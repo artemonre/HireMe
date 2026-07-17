@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,7 +54,15 @@ fun App() {
         scope.launch {
             // Capture the current (still old-themed) frame before the state change below
             // causes the content to recompose with the new theme's colors.
-            oldSnapshot = graphicsLayer.toImageBitmap()
+            val snapshot = graphicsLayer.toImageBitmap()
+            // Snap here, in the same coroutine as the snapshot/theme change, so the very
+            // first frame drawn with the new snapshot already has a zeroed-out reveal
+            // radius. Doing this later (e.g. in a LaunchedEffect keyed on oldSnapshot)
+            // leaves a stray frame where revealProgress still holds its previous end
+            // value (1f), which briefly renders the fully-revealed new theme before
+            // snapping back and replaying the wipe.
+            revealProgress.snapTo(0f)
+            oldSnapshot = snapshot
             themeMode = mode
         }
     }
@@ -65,7 +74,6 @@ fun App() {
         // actually flip light/dark still clears the snapshot instead of leaving it stuck.
         LaunchedEffect(oldSnapshot) {
             if (oldSnapshot != null) {
-                revealProgress.snapTo(0f)
                 revealProgress.animateTo(1f, tween(600, easing = FastOutSlowInEasing))
                 oldSnapshot = null
             }
@@ -84,7 +92,13 @@ fun App() {
                                 this@drawWithContent.drawContent()
                             }
                             drawContent()
-                        },
+                        }
+                        // Placed after drawWithContent (i.e. innermost) so this fill is
+                        // part of what drawContent() replays inside graphicsLayer.record
+                        // above, not drawn directly to the real canvas. Otherwise the
+                        // snapshot has a transparent background and the new (already
+                        // recomposed) Surface color shows through it instantly.
+                        .background(backgroundColor),
                 ) {
                     AppNavigation(
                         themeMode = themeMode,

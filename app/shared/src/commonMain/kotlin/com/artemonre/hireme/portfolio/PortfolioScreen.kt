@@ -69,6 +69,7 @@ fun PortfolioScreen(
                             index = index,
                             count = ThemeMode.entries.size,
                         ),
+                        icon = {},
                         label = { Text(mode.label) },
                     )
                 }
