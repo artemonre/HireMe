@@ -14,11 +14,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,12 +31,15 @@ private val WideLayoutBreakpoint = 600.dp
 private val MinWideCardWidth = 280.dp
 private const val WideCardWidthFraction = 0.3f
 
-// Fixed placeholder gradient (not theme-derived), same precedent as the brand link gradients.
-private val ProjectCardGradient = Brush.horizontalGradient(listOf(Color(0xFF1E3A8A), Color(0xFF3B82F6)))
-
 @Composable
 fun ProjectsSection(projects: List<Project>) {
     if (projects.isEmpty()) return
+
+    // A solid color paired with its guaranteed "on" role, rather than a gradient between
+    // two roles (e.g. primary + primaryContainer) whose relative lightness isn't
+    // guaranteed to stay consistent across light/dark themes or future palette edits.
+    val cardColor = MaterialTheme.colorScheme.primary
+    val cardTextColor = MaterialTheme.colorScheme.onPrimary
 
     Text(
         text = "Projects",
@@ -58,18 +61,18 @@ fun ProjectsSection(projects: List<Project>) {
                     modifier = Modifier
                         .width(cardWidth)
                         .clip(CardDefaults.shape)
-                        .background(ProjectCardGradient),
+                        .background(cardColor),
                     colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(project.name, style = MaterialTheme.typography.titleSmall, color = Color.White)
+                        Text(project.name, style = MaterialTheme.typography.titleSmall, color = cardTextColor)
                         Text(
                             text = project.duration,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.85f),
+                            color = cardTextColor.copy(alpha = 0.85f),
                         )
                         Spacer(Modifier.height(8.dp))
-                        Text(project.description, style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                        Text(project.description, style = MaterialTheme.typography.bodyMedium, color = cardTextColor)
                     }
                 }
             }
@@ -81,8 +84,10 @@ fun ProjectsSection(projects: List<Project>) {
 @Preview
 private fun ProjectsSectionPreview() {
     HireMeTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            ProjectsSection(myProfile.projects)
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                ProjectsSection(myProfile.projects)
+            }
         }
     }
 }

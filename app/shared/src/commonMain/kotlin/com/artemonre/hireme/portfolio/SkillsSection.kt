@@ -93,8 +93,10 @@ fun SkillsSection(skills: List<Skill>) {
 @Preview
 private fun SkillsSectionPreview() {
     HireMeTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            SkillsSection(myProfile.skills)
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                SkillsSection(myProfile.skills)
+            }
         }
     }
 }

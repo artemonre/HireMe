@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -69,8 +70,10 @@ fun LinksSection(links: List<PortfolioLink>) {
 @Preview
 private fun LinksSectionPreview() {
     HireMeTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            LinksSection(myProfile.links)
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                LinksSection(myProfile.links)
+            }
         }
     }
 }

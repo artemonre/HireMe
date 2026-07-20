@@ -38,3 +38,8 @@ This is a Kotlin Multiplatform project with a Gradle module layout, targeting An
 Dependency direction: `:server` and `:app:androidApp`/`:app:desktopApp`/`:app:webApp` → `:app:shared` → `:core`, with `:server` depending on `:core` directly (bypassing `:app:shared`).
 
 Gradle plugin/dependency versions are centralized in `gradle/libs.versions.toml` (version catalog); add new dependencies there rather than hardcoding versions in module `build.gradle.kts` files.
+
+## Coding guidelines
+
+- Prefer non-deprecated functions and classes. If the only option is deprecated, or the deprecated one is genuinely the better choice, ask before using it rather than picking silently.
+- Avoid hardcoded resources (colors, strings, dimensions, etc.) — create or reuse a shared resource (theme color, string resource, dimension constant, ...) where possible instead of inlining a literal. When planning work and a hardcoded value looks necessary, call it out explicitly in the plan rather than letting it pass silently.

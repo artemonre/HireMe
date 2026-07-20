@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -133,7 +134,9 @@ fun PortfolioScreen(
 @Preview
 private fun PortfolioScreenLightPreview() {
     HireMeTheme(darkTheme = false) {
-        PortfolioScreen()
+        Surface(color = MaterialTheme.colorScheme.background) {
+            PortfolioScreen()
+        }
     }
 }
 
@@ -141,6 +144,8 @@ private fun PortfolioScreenLightPreview() {
 @Preview
 private fun PortfolioScreenDarkPreview() {
     HireMeTheme(darkTheme = true) {
-        PortfolioScreen()
+        Surface(color = MaterialTheme.colorScheme.background) {
+            PortfolioScreen()
+        }
     }
 }

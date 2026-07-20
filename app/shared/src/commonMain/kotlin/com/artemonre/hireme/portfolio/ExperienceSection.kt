@@ -11,12 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextDecoration
@@ -35,9 +35,6 @@ private val monthAbbreviations = listOf(
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 )
-
-// Fixed placeholder gradient (not theme-derived), same precedent as the brand link gradients.
-private val ExperienceCardGradient = Brush.horizontalGradient(listOf(Color(0xFF0F766E), Color(0xFF2DD4BF)))
 
 @Suppress("DEPRECATION")
 private fun LocalDate.formatMonthYear(): String = "${monthAbbreviations[monthNumber - 1]} $year"
@@ -72,6 +69,11 @@ fun ExperienceSection(experience: List<Experience>) {
 
     val uriHandler = LocalUriHandler.current
     val totalMonths = remember(experience) { totalExperienceMonths(experience) }
+    // A solid color paired with its guaranteed "on" role, rather than a gradient between
+    // two roles (e.g. secondary + secondaryContainer) whose relative lightness isn't
+    // guaranteed to stay consistent across light/dark themes or future palette edits.
+    val cardColor = MaterialTheme.colorScheme.secondary
+    val cardTextColor = MaterialTheme.colorScheme.onSecondary
 
     Text(
         text = "Experience",
@@ -94,11 +96,11 @@ fun ExperienceSection(experience: List<Experience>) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(CardDefaults.shape)
-                    .background(ExperienceCardGradient),
+                    .background(cardColor),
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent),
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(entry.title, style = MaterialTheme.typography.titleSmall, color = Color.White)
+                    Text(entry.title, style = MaterialTheme.typography.titleSmall, color = cardTextColor)
                     val employerModifier = if (entry.url != null) {
                         Modifier.clickable { uriHandler.openUri(entry.url) }
                     } else {
@@ -107,17 +109,17 @@ fun ExperienceSection(experience: List<Experience>) {
                     Text(
                         text = entry.employer,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.85f),
+                        color = cardTextColor.copy(alpha = 0.85f),
                         textDecoration = if (entry.url != null) TextDecoration.Underline else null,
                         modifier = employerModifier,
                     )
                     Text(
                         text = entry.formatDateRange(),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.85f),
+                        color = cardTextColor.copy(alpha = 0.85f),
                     )
                     Spacer(Modifier.height(8.dp))
-                    Text(entry.description, style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                    Text(entry.description, style = MaterialTheme.typography.bodyMedium, color = cardTextColor)
                 }
             }
         }
@@ -128,8 +130,10 @@ fun ExperienceSection(experience: List<Experience>) {
 @Preview
 private fun ExperienceSectionPreview() {
     HireMeTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            ExperienceSection(myProfile.experience)
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                ExperienceSection(myProfile.experience)
+            }
         }
     }
 }

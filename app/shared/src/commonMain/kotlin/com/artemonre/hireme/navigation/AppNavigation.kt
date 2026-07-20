@@ -1,5 +1,7 @@
 package com.artemonre.hireme.navigation
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -42,10 +44,12 @@ fun AppNavigation(
 private fun AppNavigationPreview() {
     var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
     HireMeTheme {
-        AppNavigation(
-            themeMode = themeMode,
-            onThemeModeChange = { themeMode = it },
-            onAvatarPositioned = { _, _ -> },
-        )
+        Surface(color = MaterialTheme.colorScheme.background) {
+            AppNavigation(
+                themeMode = themeMode,
+                onThemeModeChange = { themeMode = it },
+                onAvatarPositioned = { _, _ -> },
+            )
+        }
     }
 }
