@@ -1,24 +1,45 @@
 package com.artemonre.hireme.portfolio
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,6 +56,8 @@ private val monthAbbreviations = listOf(
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 )
+
+private enum class ExperienceExpansion { COLLAPSED, HALF_EXPANDED, EXPANDED }
 
 @Suppress("DEPRECATION")
 private fun LocalDate.formatMonthYear(): String = "${monthAbbreviations[monthNumber - 1]} $year"
@@ -63,6 +86,7 @@ private fun formatDuration(months: Long): String {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExperienceSection(experience: List<Experience>) {
     if (experience.isEmpty()) return
@@ -74,53 +98,148 @@ fun ExperienceSection(experience: List<Experience>) {
     // guaranteed to stay consistent across light/dark themes or future palette edits.
     val cardColor = MaterialTheme.colorScheme.secondary
     val cardTextColor = MaterialTheme.colorScheme.onSecondary
+    val cardGradient = Brush.linearGradient(
+        colors = listOf(cardColor, cardColor.copy(alpha = 0.95f)),
+        start = Offset(0f, Float.POSITIVE_INFINITY),
+        end = Offset(Float.POSITIVE_INFINITY, 0f),
+    )
+    var expansion by remember { mutableStateOf(ExperienceExpansion.COLLAPSED) }
+    var showBottomSheet by remember { mutableStateOf(false) }
 
-    Text(
-        text = "Experience",
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.fillMaxWidth(),
-    )
-    Text(
-        text = "${formatDuration(totalMonths)} total",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.fillMaxWidth(),
-    )
-    Spacer(Modifier.height(8.dp))
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        experience.forEach { entry ->
-            Card(
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val isWideScreen = maxWidth >= WideLayoutBreakpoint
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(CardDefaults.shape)
-                    .background(cardColor),
-                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                    .clickable {
+                        if (isWideScreen) {
+                            expansion = if (expansion == ExperienceExpansion.COLLAPSED) {
+                                ExperienceExpansion.HALF_EXPANDED
+                            } else {
+                                ExperienceExpansion.COLLAPSED
+                            }
+                        } else {
+                            showBottomSheet = true
+                        }
+                    },
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(entry.title, style = MaterialTheme.typography.titleSmall, color = cardTextColor)
-                    val employerModifier = if (entry.url != null) {
-                        Modifier.clickable { uriHandler.openUri(entry.url) }
-                    } else {
-                        Modifier
-                    }
+                Text(
+                    text = "Experience",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = entry.employer,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = cardTextColor.copy(alpha = 0.85f),
-                        textDecoration = if (entry.url != null) TextDecoration.Underline else null,
-                        modifier = employerModifier,
-                    )
-                    Text(
-                        text = entry.formatDateRange(),
+                        text = "${formatDuration(totalMonths)} total",
                         style = MaterialTheme.typography.bodySmall,
-                        color = cardTextColor.copy(alpha = 0.85f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Spacer(Modifier.height(8.dp))
-                    Text(entry.description, style = MaterialTheme.typography.bodyMedium, color = cardTextColor)
+                    if (isWideScreen) {
+                        Spacer(Modifier.width(4.dp))
+                        val rotation by animateFloatAsState(
+                            if (expansion != ExperienceExpansion.COLLAPSED) 180f else 0f,
+                        )
+                        Icon(
+                            imageVector = Icons.Filled.KeyboardArrowDown,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp).rotate(rotation),
+                        )
+                    }
                 }
+            }
+
+            if (isWideScreen && expansion != ExperienceExpansion.COLLAPSED) {
+                Spacer(Modifier.height(8.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth().animateContentSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    experience.forEach { entry ->
+                        ExperienceCard(
+                            entry = entry,
+                            cardGradient = cardGradient,
+                            cardTextColor = cardTextColor,
+                            showFullDetail = expansion == ExperienceExpansion.EXPANDED,
+                            onClick = if (expansion == ExperienceExpansion.HALF_EXPANDED) {
+                                { expansion = ExperienceExpansion.EXPANDED }
+                            } else {
+                                null
+                            },
+                            uriHandler = uriHandler,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    if (showBottomSheet) {
+        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                experience.forEach { entry ->
+                    ExperienceCard(
+                        entry = entry,
+                        cardGradient = cardGradient,
+                        cardTextColor = cardTextColor,
+                        showFullDetail = true,
+                        onClick = null,
+                        uriHandler = uriHandler,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExperienceCard(
+    entry: Experience,
+    cardGradient: Brush,
+    cardTextColor: Color,
+    showFullDetail: Boolean,
+    onClick: (() -> Unit)?,
+    uriHandler: UriHandler,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(CardDefaults.shape)
+            .background(cardGradient)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(entry.title, style = MaterialTheme.typography.titleSmall, color = cardTextColor)
+            val employerModifier = if (showFullDetail && entry.url != null) {
+                Modifier.clickable { uriHandler.openUri(entry.url) }
+            } else {
+                Modifier
+            }
+            Text(
+                text = entry.employer,
+                style = MaterialTheme.typography.bodyMedium,
+                color = cardTextColor.copy(alpha = 0.85f),
+                textDecoration = if (showFullDetail && entry.url != null) TextDecoration.Underline else null,
+                modifier = employerModifier,
+            )
+            Text(
+                text = entry.formatDateRange(),
+                style = MaterialTheme.typography.bodySmall,
+                color = cardTextColor.copy(alpha = 0.85f),
+            )
+            if (showFullDetail) {
+                Spacer(Modifier.height(8.dp))
+                Text(entry.description, style = MaterialTheme.typography.bodyMedium, color = cardTextColor)
             }
         }
     }

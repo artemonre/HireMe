@@ -27,7 +27,6 @@ import com.artemonre.hireme.theme.HireMeTheme
 // Below this width, a card fills the available width (one at a time, like a mobile carousel).
 // At or above it, a card takes a fraction of the width, floored so it never gets cramped
 // even if the viewport is only barely past the breakpoint.
-private val WideLayoutBreakpoint = 600.dp
 private val MinWideCardWidth = 280.dp
 private const val WideCardWidthFraction = 0.3f
 
