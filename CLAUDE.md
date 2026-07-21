@@ -41,7 +41,9 @@ Gradle plugin/dependency versions are centralized in `gradle/libs.versions.toml`
 
 ## Git workflow
 
+- New branches are created from `develop` by default, not `master`.
 - Feature branches merge into `develop` by default, not `master`. Only merge into `master` when explicitly told to.
+- `develop` is the repo's default branch on GitHub (PR base, deletion-protected).
 
 ## Coding guidelines
 
