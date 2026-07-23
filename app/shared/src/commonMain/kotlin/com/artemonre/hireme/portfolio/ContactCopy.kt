@@ -25,7 +25,7 @@ internal expect fun plainTextClipEntry(text: String): ClipEntry
 // (material-icons-extended) is a much larger dependency just for this one glyph.
 @Composable
 internal fun CopyIcon(modifier: Modifier = Modifier, tint: Color = LocalContentColor.current) {
-    Canvas(modifier = modifier.size(18.dp)) {
+    Canvas(modifier = modifier.size(12.dp)) {
         val strokeWidthPx = 1.5.dp.toPx()
         val corner = CornerRadius(2.dp.toPx())
         val squareSize = Size(size.width * 0.7f, size.height * 0.7f)
