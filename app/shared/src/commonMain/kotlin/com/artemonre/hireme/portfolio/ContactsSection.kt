@@ -10,44 +10,108 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.artemonre.hireme.theme.HireMeTheme
 
+private const val ContactsFullTitle = "You can reach me by one of these options:"
+private val ContactsSheetTitleHorizontalPadding = 64.dp
+
 @Composable
-fun ContactsSection(contacts: List<PortfolioLink>) {
+fun ContactsSection(contacts: List<PortfolioLink>, isWideScreen: Boolean) {
     if (contacts.isEmpty()) return
 
     val uriHandler = LocalUriHandler.current
+    var showBottomSheet by remember { mutableStateOf(false) }
 
-    Text(
-        text = "You can reach me by one of those options:",
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.fillMaxWidth(),
-    )
-    Spacer(Modifier.height(8.dp))
-    contacts.forEach { contact ->
-        Text(
-            text = contact.label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
+    Column(
+        modifier = if (isWideScreen) {
+            Modifier.fillMaxWidth()
+        } else {
+            Modifier
                 .fillMaxWidth()
-                .clickable { uriHandler.openUri(contact.url) }
-                .padding(vertical = 8.dp),
+                .padding(horizontal = ScreenPadding)
+        },
+    ) {
+        Text(
+            text = if (isWideScreen) ContactsFullTitle else "Contacts",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = if (isWideScreen) {
+                Modifier.fillMaxWidth()
+            } else {
+                Modifier.fillMaxWidth().clickable { showBottomSheet = true }
+            },
         )
+        // On wide screens contacts sit right here, always visible. On narrow screens, tapping
+        // the header above opens a bottom sheet instead (same pattern as ExperienceSection).
+        if (isWideScreen) {
+            Spacer(Modifier.height(8.dp))
+            contacts.forEach { contact -> ContactLink(contact, uriHandler) }
+        }
+    }
+
+    if (!isWideScreen && showBottomSheet) {
+        PortfolioModal(onDismissRequest = { showBottomSheet = false }) {
+            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = ContactsFullTitle,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = ContactsSheetTitleHorizontalPadding),
+                )
+                Spacer(Modifier.height(8.dp))
+                Column(modifier = Modifier.padding(horizontal = ScreenPadding)) {
+                    contacts.forEach { contact -> ContactLink(contact, uriHandler) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ContactLink(contact: PortfolioLink, uriHandler: UriHandler) {
+    Text(
+        text = contact.label,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { uriHandler.openUri(contact.url) }
+            .padding(vertical = 8.dp),
+    )
+}
+
+@Composable
+@Preview
+private fun ContactsSectionWidePreview() {
+    HireMeTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                ContactsSection(myProfile.contacts, isWideScreen = true)
+            }
+        }
     }
 }
 
 @Composable
 @Preview
-private fun ContactsSectionPreview() {
+private fun ContactsSectionNarrowPreview() {
     HireMeTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.padding(16.dp)) {
-                ContactsSection(myProfile.contacts)
+                ContactsSection(myProfile.contacts, isWideScreen = false)
             }
         }
     }

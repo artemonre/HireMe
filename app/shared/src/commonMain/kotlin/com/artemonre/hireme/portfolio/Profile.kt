@@ -37,6 +37,8 @@ data class PortfolioProfile(
     val projects: List<Project>,
     val links: List<PortfolioLink>,
     val contacts: List<PortfolioLink>,
+    val applicationTechnologies: List<String>,
+    val serverTechnologies: List<String>,
 )
 
 // All portfolio content lives here — edit this to update what the app displays.
@@ -105,4 +107,6 @@ val myProfile = PortfolioProfile(
     contacts = listOf(
         PortfolioLink("Email", "mailto:balzanartem@gmail.com"),
     ),
+    applicationTechnologies = listOf("Kotlin", "Jetpack Compose", "Compose Multiplatform"),
+    serverTechnologies = listOf("Firebase", "GitHub Actions"),
 )

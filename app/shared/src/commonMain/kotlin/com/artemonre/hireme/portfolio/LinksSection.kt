@@ -36,32 +36,42 @@ fun LinksSection(links: List<PortfolioLink>) {
 
     val uriHandler = LocalUriHandler.current
 
-    Text(
-        text = "Links",
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.fillMaxWidth(),
-    )
-    Spacer(Modifier.height(8.dp))
-    val defaultGradient = Brush.horizontalGradient(
-        listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.secondaryContainer),
-    )
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = ScreenPadding),
     ) {
-        links.forEach { link ->
-            val brandGradient = platformGradient(link.label)
-            val labelColor = if (brandGradient != null) Color.White else MaterialTheme.colorScheme.onPrimaryContainer
-            AssistChip(
-                onClick = { uriHandler.openUri(link.url) },
-                label = { Text(link.label, color = labelColor) },
-                colors = AssistChipDefaults.assistChipColors(containerColor = Color.Transparent),
-                border = null,
-                modifier = Modifier
-                    .clip(AssistChipDefaults.shape)
-                    .background(brandGradient ?: defaultGradient),
-            )
+        Text(
+            text = "Links",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(8.dp))
+        val defaultGradient = Brush.horizontalGradient(
+            listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.secondaryContainer),
+        )
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            links.forEach { link ->
+                val brandGradient = platformGradient(link.label)
+                val labelColor = if (brandGradient != null) {
+                    Color.White
+                } else {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                }
+                AssistChip(
+                    onClick = { uriHandler.openUri(link.url) },
+                    label = { Text(link.label, color = labelColor) },
+                    colors = AssistChipDefaults.assistChipColors(containerColor = Color.Transparent),
+                    border = null,
+                    modifier = Modifier
+                        .clip(AssistChipDefaults.shape)
+                        .background(brandGradient ?: defaultGradient),
+                )
+            }
         }
     }
 }
