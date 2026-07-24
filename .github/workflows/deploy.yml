@@ -27,6 +27,9 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Build Wasm distribution
         run: ./gradlew :app:webApp:wasmJsBrowserDistribution
 
