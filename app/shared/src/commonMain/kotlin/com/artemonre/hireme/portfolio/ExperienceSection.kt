@@ -20,10 +20,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -86,7 +84,6 @@ private fun formatDuration(months: Long): String {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExperienceSection(experience: List<Experience>) {
     if (experience.isEmpty()) return
@@ -109,7 +106,7 @@ fun ExperienceSection(experience: List<Experience>) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val isWideScreen = maxWidth >= WideLayoutBreakpoint
 
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenPadding)) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -177,7 +174,7 @@ fun ExperienceSection(experience: List<Experience>) {
     }
 
     if (showBottomSheet) {
-        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+        PortfolioModal(onDismissRequest = { showBottomSheet = false }) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

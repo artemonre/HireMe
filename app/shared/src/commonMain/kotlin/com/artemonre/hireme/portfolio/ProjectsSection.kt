@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -43,16 +44,21 @@ fun ProjectsSection(projects: List<Project>) {
     Text(
         text = "Projects",
         style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenPadding),
     )
     Spacer(Modifier.height(8.dp))
+    // No horizontal padding on the row itself (unlike other sections) — it spans the full
+    // screen width and uses contentPadding instead, so a scrolled-to card can peek past the
+    // last full card right up to the screen edge instead of stopping dead at a hard margin.
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val usableWidth = (maxWidth - ScreenPadding * 2).coerceAtLeast(0.dp)
         val cardWidth = if (maxWidth < WideLayoutBreakpoint) {
-            maxWidth
+            usableWidth
         } else {
-            (maxWidth * WideCardWidthFraction).coerceIn(MinWideCardWidth, maxWidth)
+            (usableWidth * WideCardWidthFraction).coerceIn(MinWideCardWidth, usableWidth)
         }
         LazyRow(
+            contentPadding = PaddingValues(horizontal = ScreenPadding),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(projects) { project ->

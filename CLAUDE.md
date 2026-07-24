@@ -39,6 +39,12 @@ Dependency direction: `:server` and `:app:androidApp`/`:app:desktopApp`/`:app:we
 
 Gradle plugin/dependency versions are centralized in `gradle/libs.versions.toml` (version catalog); add new dependencies there rather than hardcoding versions in module `build.gradle.kts` files.
 
+## Git workflow
+
+- New branches are created from `develop` by default, not `master`.
+- Feature branches merge into `develop` by default, not `master`. Only merge into `master` when explicitly told to.
+- `develop` is the repo's default branch on GitHub (PR base, deletion-protected).
+
 ## Coding guidelines
 
 - Prefer non-deprecated functions and classes. If the only option is deprecated, or the deprecated one is genuinely the better choice, ask before using it rather than picking silently.
