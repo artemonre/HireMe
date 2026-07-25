@@ -40,6 +40,7 @@ import com.artemonre.hireme.theme.HireMeTheme
 private val ChipHorizontalSpacing = 8.dp
 private val ChipVerticalSpacing = 4.dp
 private val TitleToChipsGap = 8.dp
+private const val NarrowMaxVisibleSkills = 10
 
 @Composable
 fun SkillsSection(skills: List<Skill>, isWideScreen: Boolean, modifier: Modifier = Modifier) {
@@ -58,22 +59,30 @@ fun SkillsSection(skills: List<Skill>, isWideScreen: Boolean, modifier: Modifier
         )
     } else {
         // Narrow layout has no height constraint of its own — the page-level scroll handles
-        // overflow, so every skill is always shown.
+        // overflow — but the chip list itself is still capped, replacing trailing chips with a
+        // "+N more" chip that opens the same all-skills sheet as on wide screens.
         NarrowSkillsContent(
             skills = skills,
+            onShowAllClick = { showAllSkills = true },
             modifier = modifier.fillMaxWidth().padding(horizontal = ScreenPadding),
         )
     }
 
-    if (isWideScreen && showAllSkills) {
+    if (showAllSkills) {
         AllSkillsSheet(skills = skills, onDismissRequest = { showAllSkills = false })
     }
 }
 
 @Composable
-private fun NarrowSkillsContent(skills: List<Skill>, modifier: Modifier = Modifier) {
+private fun NarrowSkillsContent(
+    skills: List<Skill>,
+    onShowAllClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     var expandedSkill by remember { mutableStateOf<Skill?>(null) }
     val density = LocalDensity.current
+    val visibleSkills = skills.take(NarrowMaxVisibleSkills)
+    val hiddenCount = skills.size - visibleSkills.size
 
     Column(modifier = modifier) {
         Text(
@@ -87,7 +96,7 @@ private fun NarrowSkillsContent(skills: List<Skill>, modifier: Modifier = Modifi
             horizontalArrangement = Arrangement.spacedBy(ChipHorizontalSpacing),
             verticalArrangement = Arrangement.spacedBy(ChipVerticalSpacing),
         ) {
-            skills.forEach { skill ->
+            visibleSkills.forEach { skill ->
                 SkillChip(
                     skill = skill,
                     isExpanded = expandedSkill == skill,
@@ -95,6 +104,9 @@ private fun NarrowSkillsContent(skills: List<Skill>, modifier: Modifier = Modifi
                     onDismissDescription = { expandedSkill = null },
                     density = density,
                 )
+            }
+            if (hiddenCount > 0) {
+                OverflowChip(hiddenCount = hiddenCount, onClick = onShowAllClick)
             }
         }
     }
