@@ -38,6 +38,7 @@ data class PortfolioProfile(
     val name: String,
     val title: String,
     val bio: String,
+    val tagline: String,
     val skills: List<Skill>,
     val experience: List<Experience>,
     val projects: List<Project>,
@@ -54,6 +55,7 @@ val myProfile = PortfolioProfile(
     bio = """
         Passionate about learning and adopting new technologies, which is where I perform best — on new builds or projects undergoing change and migration. I bring broad experience both building products from scratch and modernizing existing ones.
     """.trimIndent(),
+    tagline = "Thrives on new builds and modernizing legacy systems — always learning, always adapting.",
     skills = listOf(
         Skill(
             name = "Android",
