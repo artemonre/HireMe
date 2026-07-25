@@ -35,7 +35,7 @@ private const val ContactsFullTitle = "You can reach me by one of these options:
 private val ContactsSheetTitleHorizontalPadding = 64.dp
 
 @Composable
-fun ContactsSection(contacts: List<PortfolioLink>, isWideScreen: Boolean, snackbarHostState: SnackbarHostState) {
+fun ContactsSection(contacts: List<PortfolioContact>, isWideScreen: Boolean, snackbarHostState: SnackbarHostState) {
     if (contacts.isEmpty()) return
 
     val uriHandler = LocalUriHandler.current
@@ -90,12 +90,12 @@ fun ContactsSection(contacts: List<PortfolioLink>, isWideScreen: Boolean, snackb
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ContactLink(contact: PortfolioLink, uriHandler: UriHandler, snackbarHostState: SnackbarHostState) {
+private fun ContactLink(contact: PortfolioContact, uriHandler: UriHandler, snackbarHostState: SnackbarHostState) {
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
     val copyToClipboard: () -> Unit = {
         scope.launch {
-            clipboard.setClipEntry(plainTextClipEntry(contact.rawValue()))
+            clipboard.setClipEntry(plainTextClipEntry(contact.value))
             snackbarHostState.showSnackbar("Copied ${contact.label} to clipboard")
         }
     }
@@ -116,8 +116,6 @@ private fun ContactLink(contact: PortfolioLink, uriHandler: UriHandler, snackbar
         ContactCopyButton(onCopy = copyToClipboard)
     }
 }
-
-private fun PortfolioLink.rawValue(): String = url.substringAfter(":")
 
 @Composable
 @Preview
