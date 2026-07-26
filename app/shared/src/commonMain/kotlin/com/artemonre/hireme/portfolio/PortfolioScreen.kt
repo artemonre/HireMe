@@ -61,7 +61,7 @@ fun PortfolioScreen(
     profile: PortfolioProfile = myProfile,
     themeMode: ThemeMode = ThemeMode.SYSTEM,
     onThemeModeChange: (ThemeMode) -> Unit = {},
-    onAvatarPositioned: (center: Offset, radiusPx: Float) -> Unit = { _, _ -> },
+    onHeaderPositioned: (center: Offset, radiusPx: Float) -> Unit = { _, _ -> },
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -123,7 +123,7 @@ fun PortfolioScreen(
                     ) {
                         ProfileHeader(
                             profile = profile,
-                            onAvatarPositioned = onAvatarPositioned,
+                            onHeaderPositioned = onHeaderPositioned,
                             modifier = Modifier
                                 .width(ProfileCardWideWidth)
                                 .onGloballyPositioned { profileHeaderHeightPx = it.size.height },
@@ -150,7 +150,7 @@ fun PortfolioScreen(
                         // (which would double up with ContactsSection's own padding).
                         ProfileHeader(
                             profile = profile,
-                            onAvatarPositioned = onAvatarPositioned,
+                            onHeaderPositioned = onHeaderPositioned,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = ScreenPadding),

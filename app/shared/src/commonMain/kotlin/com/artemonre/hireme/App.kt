@@ -44,7 +44,7 @@ fun App() {
     }
 
     var revealCenter by remember { mutableStateOf(Offset.Zero) }
-    var avatarRadiusPx by remember { mutableStateOf(0f) }
+    var revealRadiusPx by remember { mutableStateOf(0f) }
     val revealProgress = remember { Animatable(1f) }
     var oldSnapshot by remember { mutableStateOf<ImageBitmap?>(null) }
     val graphicsLayer = rememberGraphicsLayer()
@@ -103,9 +103,9 @@ fun App() {
                     AppNavigation(
                         themeMode = themeMode,
                         onThemeModeChange = ::changeTheme,
-                        onAvatarPositioned = { center, radiusPx ->
+                        onHeaderPositioned = { center, radiusPx ->
                             revealCenter = center
-                            avatarRadiusPx = radiusPx
+                            revealRadiusPx = radiusPx
                         },
                     )
                 }
@@ -120,8 +120,8 @@ fun App() {
                             Offset(size.width, size.height),
                         ).maxOf { corner -> (corner - revealCenter).getDistance() }
 
-                        val currentRadius = avatarRadiusPx +
-                            revealProgress.value * (maxRadius - avatarRadiusPx)
+                        val currentRadius = revealRadiusPx +
+                            revealProgress.value * (maxRadius - revealRadiusPx)
 
                         val path = Path().apply {
                             fillType = PathFillType.EvenOdd
