@@ -15,6 +15,7 @@ data class PortfolioContact(
 
 data class Skill(
     val name: String,
+    val skillLevel: Int,
     val highlighted: Boolean = false,
     val description: String = "",
 )
@@ -59,123 +60,152 @@ val myProfile = PortfolioProfile(
     skills = listOf(
         Skill(
             name = "Android",
+            skillLevel = 9,
             highlighted = true,
             description = "Native Android app development with modern tooling.",
         ),
         Skill(
             name = "Kotlin",
+            skillLevel = 9,
             highlighted = true,
             description = "Primary language for backend, Android, and multiplatform work.",
         ),
         Skill(
             name = "Jetpack Compose",
+            skillLevel = 9,
             highlighted = true,
             description = "Declarative UI toolkit for native Android.",
         ),
         Skill(
             name = "Kotlin Coroutines & Flow",
+            skillLevel = 6,
             description = "Asynchronous and reactive programming; led the migration from RxJava to Coroutines/Flow at Lectera, cutting boilerplate by ~20%.",
         ),
         Skill(
             name = "Clean Architecture",
+            skillLevel = 9,
             highlighted = true,
             description = "Layered, testable architecture approach applied to keep codebases maintainable as they scaled.",
         ),
         Skill(
             name = "Kotlin Multiplatform",
+            skillLevel = 6,
             description = "Sharing business logic and UI across platforms.",
         ),
         Skill(
             name = "Compose Multiplatform",
+            skillLevel = 6,
             description = "Cross-platform declarative UI built on Compose.",
         ),
         Skill(
             name = "Software Architecture",
+            skillLevel = 6,
             description = "Broader architectural decision-making — evaluating trade-offs and setting technical direction, most visible in the Lectera migrations.",
         ),
         Skill(
             name = "Gradle",
+            skillLevel = 6,
             description = "Build system configuration for Android projects, including build variants and dependency management.",
         ),
         Skill(
             name = "AI Pair Programming",
+            skillLevel = 9,
             highlighted = true,
             description = "Using AI coding assistants (e.g. GitHub Copilot, Claude, Cursor) as part of the daily engineering workflow, with the judgment to review, validate, and refine AI-generated code rather than accept it blindly.",
         ),
         Skill(
             name = "Android Jetpack (libraries)",
+            skillLevel = 6,
             description = "Umbrella term for Jetpack components used beyond Compose — ViewModel, Navigation, LiveData, WorkManager-style architecture pieces.",
         ),
         Skill(
             name = "Unit & Integration Testing",
+            skillLevel = 6,
             description = "Writing and maintaining automated tests to protect reliability during refactors and migrations.",
         ),
         Skill(
             name = "MVVM (Model-View-ViewModel)",
+            skillLevel = 6,
             description = "Primary architectural pattern used across Lectera, Preon, and Ru-you projects.",
         ),
         Skill(
             name = "Modular / Multi-module Architecture",
+            skillLevel = 6,
             description = "Splitting large codebases into independent modules for build speed and separation of concerns (Preon).",
         ),
         Skill(
             name = "Legacy System Modernization",
+            skillLevel = 6,
             description = "Planning and executing large migrations on live production code — RxJava → Coroutines/Flow, Media2 → Media3.",
         ),
         Skill(
             name = "Code Refactoring",
+            skillLevel = 6,
             description = "Improving existing code structure and readability without changing behavior, done continuously alongside the Lectera migrations.",
         ),
         Skill(
             name = "Dependency Injection",
+            skillLevel = 6,
             description = "Used both major DI frameworks in the Android ecosystem — Dagger2 at Lectera, Koin at Preon.",
         ),
         Skill(
             name = "REST API Integration",
+            skillLevel = 6,
             description = "Consuming and integrating backend APIs, typically via Retrofit, across every role.",
         ),
         Skill(
             name = "Room",
+            skillLevel = 6,
             description = "Android's SQL persistence library used for local data storage.",
         ),
         Skill(
             name = "SQLite",
+            skillLevel = 6,
             description = "Underlying local database technology behind Room-based storage.",
         ),
         Skill(
             name = "Media Playback (ExoPlayer / Media3)",
+            skillLevel = 6,
             description = "Video/audio playback engineering — architected the Media2 → Media3 migration at Lectera.",
         ),
         Skill(
             name = "Firebase Platform",
+            skillLevel = 6,
             description = "Crash reporting and push notification infrastructure; core to raising Lectera's crash-free rate to 98–99%.",
         ),
         Skill(
             name = "Authentication & Social Sign-In",
+            skillLevel = 6,
             description = "Implementing third-party login flows.",
         ),
         Skill(
             name = "Google Mobile Services (GMS) Integration",
+            skillLevel = 6,
             description = "Integrating standard Google Play Services (location, notifications, etc.) into apps.",
         ),
         Skill(
             name = "Huawei Mobile Services (HMS) Integration",
+            skillLevel = 6,
             description = "Enabling compatibility for non-GMS Huawei devices — a distinctive, less common skill worth calling out explicitly on a CV since few Android developers have it.",
         ),
         Skill(
             name = "In-App Billing & Payments",
+            skillLevel = 6,
             description = "Implementing subscriptions and in-app purchase flows.",
         ),
         Skill(
             name = "Google Play Release Management",
+            skillLevel = 6,
             description = "End-to-end ownership of app releases — build configuration, submission, and Play Console management.",
         ),
         Skill(
             name = "Agile / Scrum",
+            skillLevel = 6,
             description = "Working within sprint-based, ceremony-driven development processes.",
         ),
         Skill(
             name = "Git & Version Control",
+            skillLevel = 6,
             description = "Standard version control workflows across all roles.",
         ),
     ),

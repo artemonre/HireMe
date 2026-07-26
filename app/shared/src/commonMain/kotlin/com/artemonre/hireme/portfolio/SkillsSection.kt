@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,6 +38,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import com.artemonre.hireme.components.BoardgameChip
+import com.artemonre.hireme.components.BoardgamePawn
+import com.artemonre.hireme.components.BoardgameScale
+import com.artemonre.hireme.components.BoardgameScaleTitlePlacement
 import com.artemonre.hireme.theme.HireMeTheme
 
 private val ChipHorizontalSpacing = 8.dp
@@ -240,11 +244,10 @@ private fun OverflowChip(hiddenCount: Int, onClick: () -> Unit, useBoardgameStyl
     }
 }
 
+private const val SkillLevelScaleCount = 10
+
 @Composable
 private fun AllSkillsSheet(skills: List<Skill>, onDismissRequest: () -> Unit) {
-    var expandedSkill by remember { mutableStateOf<Skill?>(null) }
-    val density = LocalDensity.current
-
     PortfolioModal(onDismissRequest = onDismissRequest) {
         Column(
             modifier = Modifier
@@ -262,20 +265,25 @@ private fun AllSkillsSheet(skills: List<Skill>, onDismissRequest: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(16.dp))
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(ChipHorizontalSpacing),
-                verticalArrangement = Arrangement.spacedBy(ChipVerticalSpacing),
-            ) {
-                skills.forEach { skill ->
-                    SkillChip(
-                        skill = skill,
-                        isExpanded = expandedSkill == skill,
-                        onClick = { expandedSkill = if (expandedSkill == skill) null else skill },
-                        onDismissDescription = { expandedSkill = null },
-                        density = density,
-                    )
-                }
+            skills.forEach { skill ->
+                BoardgameScale(
+                    count = SkillLevelScaleCount,
+                    value = skill.skillLevel,
+                    color = if (skill.highlighted) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.secondaryContainer
+                    },
+                    title = { Text(skill.name, style = MaterialTheme.typography.bodyMedium) },
+                    thumb = {
+                        BoardgamePawn(
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp),
+                        )
+                    },
+                    titlePlacement = BoardgameScaleTitlePlacement.Start,
+                )
+                Spacer(Modifier.height(12.dp))
             }
         }
     }
