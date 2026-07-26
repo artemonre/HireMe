@@ -1,5 +1,6 @@
 package com.artemonre.hireme.portfolio
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,10 +36,11 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import com.artemonre.hireme.components.BoardgameChip
 import com.artemonre.hireme.theme.HireMeTheme
 
 private val ChipHorizontalSpacing = 8.dp
-private val ChipVerticalSpacing = 4.dp
+private val ChipVerticalSpacing = 8.dp
 private val TitleToChipsGap = 8.dp
 private const val NarrowMaxVisibleSkills = 10
 
@@ -103,10 +105,11 @@ private fun NarrowSkillsContent(
                     onClick = { expandedSkill = if (expandedSkill == skill) null else skill },
                     onDismissDescription = { expandedSkill = null },
                     density = density,
+                    useBoardgameStyle = true,
                 )
             }
             if (hiddenCount > 0) {
-                OverflowChip(hiddenCount = hiddenCount, onClick = onShowAllClick)
+                OverflowChip(hiddenCount = hiddenCount, onClick = onShowAllClick, useBoardgameStyle = true)
             }
         }
     }
@@ -145,6 +148,7 @@ private fun WideSkillsContent(
                     onClick = { expandedSkill = if (expandedSkill == skill) null else skill },
                     onDismissDescription = { expandedSkill = null },
                     density = density,
+                    useBoardgameStyle = true,
                 )
             }.first().measure(unboundedHeight)
         }
@@ -159,7 +163,7 @@ private fun WideSkillsContent(
                 chipPlaceables
             } else {
                 val overflowPlaceable = subcompose("overflow-$hiddenCount") {
-                    OverflowChip(hiddenCount = hiddenCount, onClick = onShowAllClick)
+                    OverflowChip(hiddenCount = hiddenCount, onClick = onShowAllClick, useBoardgameStyle = true)
                 }.first().measure(unboundedHeight)
                 chipPlaceables.take(visibleCount) + overflowPlaceable
             }
@@ -216,15 +220,24 @@ private fun rowsHeight(rows: List<ChipRow>, verticalSpacing: Int): Int =
     if (rows.isEmpty()) 0 else rows.sumOf { it.height } + verticalSpacing * (rows.size - 1)
 
 @Composable
-private fun OverflowChip(hiddenCount: Int, onClick: () -> Unit) {
-    AssistChip(
-        onClick = onClick,
-        label = { Text("+$hiddenCount more") },
-        colors = AssistChipDefaults.assistChipColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            labelColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ),
-    )
+private fun OverflowChip(hiddenCount: Int, onClick: () -> Unit, useBoardgameStyle: Boolean = false) {
+    if (useBoardgameStyle) {
+        BoardgameChip(
+            text = "+$hiddenCount more",
+            backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+            textColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.clickable(onClick = onClick),
+        )
+    } else {
+        AssistChip(
+            onClick = onClick,
+            label = { Text("+$hiddenCount more") },
+            colors = AssistChipDefaults.assistChipColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                labelColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            ),
+        )
+    }
 }
 
 @Composable
@@ -275,20 +288,38 @@ private fun SkillChip(
     onClick: () -> Unit,
     onDismissDescription: () -> Unit,
     density: Density,
+    useBoardgameStyle: Boolean = false,
 ) {
     Box {
-        AssistChip(
-            onClick = onClick,
-            label = { Text(skill.name) },
-            colors = if (skill.highlighted) {
-                AssistChipDefaults.assistChipColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
-            } else {
-                AssistChipDefaults.assistChipColors()
-            },
-        )
+        if (useBoardgameStyle) {
+            BoardgameChip(
+                text = skill.name,
+                backgroundColor = if (skill.highlighted) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.secondaryContainer
+                },
+                textColor = if (skill.highlighted) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSecondaryContainer
+                },
+                modifier = Modifier.clickable(onClick = onClick),
+            )
+        } else {
+            AssistChip(
+                onClick = onClick,
+                label = { Text(skill.name) },
+                colors = if (skill.highlighted) {
+                    AssistChipDefaults.assistChipColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                } else {
+                    AssistChipDefaults.assistChipColors()
+                },
+            )
+        }
         if (isExpanded && skill.description.isNotBlank()) {
             Popup(
                 alignment = Alignment.TopCenter,
