@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.artemonre.hireme.components.BoardgameExtrusionEdges
-import com.artemonre.hireme.components.BoardgameSurface
+import com.artemonre.hireme.components.BoardgameTablet
 
 private val PortfolioModalShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
 
@@ -26,7 +26,7 @@ actual fun PortfolioModal(onDismissRequest: () -> Unit, content: @Composable () 
         containerColor = Color.Transparent,
         dragHandle = null,
     ) {
-        BoardgameSurface(
+        BoardgameTablet(
             shape = PortfolioModalShape,
             backgroundColor = MaterialTheme.colorScheme.surface,
             edges = BoardgameExtrusionEdges.Left,

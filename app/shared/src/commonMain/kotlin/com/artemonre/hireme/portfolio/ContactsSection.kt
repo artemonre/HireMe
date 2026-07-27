@@ -107,11 +107,16 @@ private fun ContactLink(contact: PortfolioContact, uriHandler: UriHandler, snack
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .fillMaxWidth()
             .copyOnSecondaryClick(onCopy = copyToClipboard)
             .combinedClickable(
                 onClick = { uriHandler.openUri(contact.url) },
                 onLongClick = copyToClipboard,
             )
+            // Expands the tap target well past the text's own glyph bounds — without this the
+            // row's clickable area was exactly the text height, making entries hard to tap
+            // precisely (and packed edge-to-edge with no breathing room between them).
+            .padding(vertical = 12.dp),
     ) {
         Text(
             text = "${contact.label}: ",

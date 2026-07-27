@@ -2,7 +2,6 @@ package com.artemonre.hireme.portfolio
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -18,7 +17,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,16 +29,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.artemonre.hireme.components.BoardgameCardSurface
 import com.artemonre.hireme.theme.HireMeTheme
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -95,11 +91,6 @@ fun ExperienceSection(experience: List<Experience>) {
     // guaranteed to stay consistent across light/dark themes or future palette edits.
     val cardColor = MaterialTheme.colorScheme.secondary
     val cardTextColor = MaterialTheme.colorScheme.onSecondary
-    val cardGradient = Brush.linearGradient(
-        colors = listOf(cardColor, cardColor.copy(alpha = 0.95f)),
-        start = Offset(0f, Float.POSITIVE_INFINITY),
-        end = Offset(Float.POSITIVE_INFINITY, 0f),
-    )
     var expansion by remember { mutableStateOf(ExperienceExpansion.COLLAPSED) }
     var showBottomSheet by remember { mutableStateOf(false) }
 
@@ -157,7 +148,7 @@ fun ExperienceSection(experience: List<Experience>) {
                     experience.forEach { entry ->
                         ExperienceCard(
                             entry = entry,
-                            cardGradient = cardGradient,
+                            cardColor = cardColor,
                             cardTextColor = cardTextColor,
                             showFullDetail = expansion == ExperienceExpansion.EXPANDED,
                             onClick = if (expansion == ExperienceExpansion.HALF_EXPANDED) {
@@ -185,7 +176,7 @@ fun ExperienceSection(experience: List<Experience>) {
                 experience.forEach { entry ->
                     ExperienceCard(
                         entry = entry,
-                        cardGradient = cardGradient,
+                        cardColor = cardColor,
                         cardTextColor = cardTextColor,
                         showFullDetail = true,
                         onClick = null,
@@ -200,20 +191,19 @@ fun ExperienceSection(experience: List<Experience>) {
 @Composable
 private fun ExperienceCard(
     entry: Experience,
-    cardGradient: Brush,
+    cardColor: Color,
     cardTextColor: Color,
     showFullDetail: Boolean,
     onClick: (() -> Unit)?,
     uriHandler: UriHandler,
     modifier: Modifier = Modifier,
 ) {
-    Card(
+    BoardgameCardSurface(
+        shape = CardDefaults.shape,
+        backgroundColor = cardColor,
         modifier = modifier
             .fillMaxWidth()
-            .clip(CardDefaults.shape)
-            .background(cardGradient)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(entry.title, style = MaterialTheme.typography.titleSmall, color = cardTextColor)

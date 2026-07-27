@@ -52,7 +52,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.artemonre.hireme.components.BoardgameExtrusionEdges
-import com.artemonre.hireme.components.BoardgameSurface
+import com.artemonre.hireme.components.BoardgameTablet
 import com.artemonre.hireme.theme.HireMeTheme
 import com.artemonre.hireme.theme.ThemeMode
 import com.artemonre.hireme.theme.surfaceDimLight
@@ -146,10 +146,6 @@ fun PortfolioScreen(
         val contentMaxWidth = (maxWidth * ContentWidthFraction)
             .coerceAtLeast(ContentMinWidth)
             .coerceAtMost(maxWidth)
-        // Whether the content column actually leaves visible margin on both sides — i.e. whether
-        // there's room, on a wide desktop window, to make the content read as a physical object
-        // sitting on the (differently-colored) window background rather than being the background.
-        val hasSideMargin = contentMaxWidth < maxWidth
 
         // Fixed color, not derived from the current theme — see PortfolioBackgroundColor above.
         Box(modifier = Modifier.fillMaxSize().background(PortfolioBackgroundColor))
@@ -182,30 +178,21 @@ fun PortfolioScreen(
                 // doesn't fully cover it (e.g. the narrow layout's Column doesn't paint its own
                 // background), letting whatever's drawn behind it bleed through those gaps.
         ) {
-            if (hasSideMargin) {
-                // Top and bottom already run flush with the window's own edges (fillMaxHeight),
-                // so only the left/right margins are visible — extrude those two edges, not
-                // bottom.
-                BoardgameSurface(
-                    shape = PortfolioCardShape,
-                    backgroundColor = MaterialTheme.colorScheme.surfaceBright,
-                    edges = BoardgameExtrusionEdges.LeftAndBottom,
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    PortfolioScreenContent(
-                        profile = profile,
-                        themeMode = themeMode,
-                        onThemeModeChange = flippingOnThemeModeChange,
-                        snackbarHostState = snackbarHostState,
-                    )
-                }
-            } else {
+            // Same BoardgameTablet chrome on every layout — narrow/mobile just has no visible
+            // margin around it (contentMaxWidth == maxWidth), not a different structure. This is
+            // also the piece that flips on a theme switch; the fixed background Box above it
+            // never does.
+            BoardgameTablet(
+                shape = PortfolioCardShape,
+                backgroundColor = MaterialTheme.colorScheme.surfaceBright,
+                edges = BoardgameExtrusionEdges.LeftAndBottom,
+                modifier = Modifier.fillMaxSize(),
+            ) {
                 PortfolioScreenContent(
                     profile = profile,
                     themeMode = themeMode,
                     onThemeModeChange = flippingOnThemeModeChange,
                     snackbarHostState = snackbarHostState,
-                    modifier = Modifier.fillMaxSize(),
                 )
             }
         }

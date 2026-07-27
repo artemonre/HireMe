@@ -37,7 +37,7 @@ private val BoardgameSurfaceElevation = 8.dp
 private val BoardgameSurfaceExtrusionOffset = 3.dp
 
 @Composable
-fun BoardgameSurface(
+fun BoardgameTablet(
     shape: Shape,
     backgroundColor: Color,
     edges: BoardgameExtrusionEdges,
@@ -84,10 +84,10 @@ fun BoardgameSurface(
 
 @Composable
 @Preview
-private fun BoardgameSurfaceLeftPreview() {
+private fun BoardgameTabletLeftPreview() {
     HireMeTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            BoardgameSurface(
+            BoardgameTablet(
                 shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
                 backgroundColor = MaterialTheme.colorScheme.surface,
                 edges = BoardgameExtrusionEdges.Left,
@@ -101,10 +101,10 @@ private fun BoardgameSurfaceLeftPreview() {
 
 @Composable
 @Preview
-private fun BoardgameSurfaceLeftAndBottomPreview() {
+private fun BoardgameTabletLeftAndBottomPreview() {
     HireMeTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            BoardgameSurface(
+            BoardgameTablet(
                 shape = RoundedCornerShape(16.dp),
                 backgroundColor = MaterialTheme.colorScheme.surface,
                 edges = BoardgameExtrusionEdges.LeftAndBottom,
@@ -118,10 +118,10 @@ private fun BoardgameSurfaceLeftAndBottomPreview() {
 
 @Composable
 @Preview
-private fun BoardgameSurfaceLeftAndRightPreview() {
+private fun BoardgameTabletLeftAndRightPreview() {
     HireMeTheme {
         Surface(color = MaterialTheme.colorScheme.surfaceDim) {
-            BoardgameSurface(
+            BoardgameTablet(
                 shape = RoundedCornerShape(16.dp),
                 backgroundColor = MaterialTheme.colorScheme.surfaceBright,
                 edges = BoardgameExtrusionEdges.LeftAndRight,
