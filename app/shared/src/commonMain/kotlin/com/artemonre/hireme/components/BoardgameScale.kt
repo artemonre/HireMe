@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -20,8 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.AlignmentLine
-import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
@@ -36,7 +36,9 @@ import com.artemonre.hireme.theme.HireMeTheme
 //  - StartTop/CenterTop/EndTop: title sits above the rounds, aligned start/center/end. It's always
 //    kept within the rounds' own width (never wider than the first-to-last round span).
 //  - Start: title sits inline, to the left of the rounds, with its text baseline aligned to the
-//    bottom of the round indicators (like a form label next to a control).
+//    bottom of the round indicators (like a form label next to a control). Fills the available
+//    width and gives the title the leftover space via weight(1f), so the rounds land in a
+//    consistent trailing column across a list of these rows regardless of title length.
 enum class BoardgameScaleTitlePlacement { Start, StartTop, CenterTop, EndTop }
 
 private val BoardgameScaleDotDiameter = 8.dp
@@ -113,36 +115,20 @@ private fun ScaleWithInlineTitle(
     thumb: @Composable () -> Unit,
     modifier: Modifier,
 ) {
-    Layout(
-        modifier = modifier,
-        content = {
+    // Fills the available width so the rounds land in the same trailing column across a list of
+    // these rows regardless of each row's title length — the title takes whatever space that
+    // leaves via weight(1f) rather than sizing to its own text. alignByBaseline (rather than
+    // Alignment.Bottom) matches the title's text baseline to the rounds, since a Text's own layout
+    // box extends below its baseline (descender space) and would otherwise look mis-aligned;
+    // ScaleRounds has no baseline of its own, so Row falls back to aligning by its full height,
+    // which for these small round indicators reads the same as bottom-aligned.
+    Row(modifier = modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.weight(1f).alignByBaseline()) {
             title()
-            ScaleRounds(count = count, value = value, color = color, thumb = thumb)
-        },
-    ) { measurables, constraints ->
-        val titlePlaceable = measurables[0].measure(Constraints())
-        val roundsPlaceable = measurables[1].measure(constraints.copy(minWidth = 0, minHeight = 0))
-
-        val gapPx = BoardgameScaleTitleGap.roundToPx()
-        val baseline = titlePlaceable[FirstBaseline].let {
-            if (it != AlignmentLine.Unspecified) it else titlePlaceable.height
         }
-
-        // Place both elements relative to one shared line — the title's baseline — rather than
-        // clamping either to y = 0. Text's baseline sits well below the top of its own layout box
-        // (`baseline` here), almost always further down than the tiny round diameter, so the title
-        // needs to start *above* y = 0 for its baseline to land on the rounds' bottom edge; picking
-        // whichever of the two is taller as the reference line keeps both placements non-negative.
-        val baselineLevel = maxOf(roundsPlaceable.height, baseline)
-        val titleY = baselineLevel - baseline
-        val roundsY = baselineLevel - roundsPlaceable.height
-
-        val totalWidth = titlePlaceable.width + gapPx + roundsPlaceable.width
-        val totalHeight = maxOf(roundsY + roundsPlaceable.height, titleY + titlePlaceable.height)
-
-        layout(totalWidth, totalHeight) {
-            titlePlaceable.placeRelative(0, titleY)
-            roundsPlaceable.placeRelative(titlePlaceable.width + gapPx, roundsY)
+        Spacer(Modifier.width(BoardgameScaleTitleGap))
+        Box(modifier = Modifier.alignByBaseline()) {
+            ScaleRounds(count = count, value = value, color = color, thumb = thumb)
         }
     }
 }

@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -66,7 +68,12 @@ fun ContactsSection(contacts: List<PortfolioContact>, isWideScreen: Boolean, sna
 
     if (!isWideScreen && showContactsList) {
         PortfolioModal(onDismissRequest = { showContactsList = false }) {
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 8.dp),
+            ) {
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = ContactsFullTitle,

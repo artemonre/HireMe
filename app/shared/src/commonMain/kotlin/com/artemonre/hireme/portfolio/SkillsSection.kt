@@ -262,7 +262,7 @@ private fun AllSkillsSheet(skills: List<Skill>, onDismissRequest: () -> Unit) {
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
             Spacer(Modifier.height(16.dp))
             skills.forEach { skill ->
@@ -282,6 +282,7 @@ private fun AllSkillsSheet(skills: List<Skill>, onDismissRequest: () -> Unit) {
                         )
                     },
                     titlePlacement = BoardgameScaleTitlePlacement.Start,
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(12.dp))
             }
