@@ -1,8 +1,6 @@
 package com.artemonre.hireme.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,44 +19,47 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.artemonre.hireme.theme.HireMeTheme
 
-// Modal chrome styled like the app's other "board game" pieces (BoardgameChip, BoardgameCardVertical):
+// Chrome styled like the app's other "board game" pieces (BoardgameChip, BoardgameCardVertical):
 // a darker side face peeks out from behind the front face to suggest physical thickness, with a
-// drop shadow and a diagonal light-to-dark gradient across the front completing the effect.
+// drop shadow and a diagonal light-to-dark gradient across the front completing the effect. Used
+// both for PortfolioModal's chrome and for the desktop-wide app frame (see PortfolioScreen).
 //
 // Those other pieces get the peek by offsetting the side face *outside* the front face's own
-// bounds, relying on an unclipped ancestor to let it show. That trick doesn't work here: both hosts
-// this is used from (ModalBottomSheet's Surface, Dialog's Surface) clip their content to their own
-// bounds, so an offset child would just be cut off. Instead, the front face is inset from the shared
-// box by the extrusion offset on whichever edges recede, leaving the darker side layer — sized to
-// the full, uninset box — peeking out of the freed-up space rather than outside the box altogether.
-enum class BoardgameModalExtrusionEdges { Left, LeftAndBottom }
+// bounds, relying on an unclipped ancestor to let it show. That trick doesn't work here: every host
+// this is used from (ModalBottomSheet's Surface, Dialog's Surface, the app's own root Box) either
+// clips its content to its own bounds or has no unused space beyond them for a child to overflow
+// into. Instead, the front face is inset from the shared box by the extrusion offset on whichever
+// edges recede, leaving the darker side layer — sized to the full, uninset box — peeking out of the
+// freed-up space rather than outside the box altogether.
+enum class BoardgameExtrusionEdges { Left, LeftAndBottom, LeftAndRight }
 
-private val BoardgameModalElevation = 8.dp
-private val BoardgameModalExtrusionOffset = 3.dp
+private val BoardgameSurfaceElevation = 8.dp
+private val BoardgameSurfaceExtrusionOffset = 3.dp
 
 @Composable
-fun BoardgameModalSurface(
+fun BoardgameSurface(
     shape: Shape,
     backgroundColor: Color,
-    edges: BoardgameModalExtrusionEdges,
+    edges: BoardgameExtrusionEdges,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     val sideColor = lerp(backgroundColor, Color.Black, 0.35f)
-    val borderColor = lerp(backgroundColor, Color.Black, 0.2f)
 
     val frontInsetModifier = when (edges) {
-        BoardgameModalExtrusionEdges.Left ->
-            Modifier.padding(start = BoardgameModalExtrusionOffset)
-        BoardgameModalExtrusionEdges.LeftAndBottom ->
-            Modifier.padding(start = BoardgameModalExtrusionOffset, bottom = BoardgameModalExtrusionOffset)
+        BoardgameExtrusionEdges.Left ->
+            Modifier.padding(start = BoardgameSurfaceExtrusionOffset)
+        BoardgameExtrusionEdges.LeftAndBottom ->
+            Modifier.padding(start = BoardgameSurfaceExtrusionOffset, bottom = BoardgameSurfaceExtrusionOffset)
+        BoardgameExtrusionEdges.LeftAndRight ->
+            Modifier.padding(horizontal = BoardgameSurfaceExtrusionOffset)
     }
 
     Box(modifier = modifier) {
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .shadow(elevation = BoardgameModalElevation, shape = shape)
+                .shadow(elevation = BoardgameSurfaceElevation, shape = shape)
                 .clip(shape)
                 .background(sideColor),
         )
@@ -75,7 +76,6 @@ fun BoardgameModalSurface(
                         ),
                     ),
                 )
-                .border(BorderStroke(1.dp, borderColor), shape),
         ) {
             content()
         }
@@ -84,13 +84,13 @@ fun BoardgameModalSurface(
 
 @Composable
 @Preview
-private fun BoardgameModalSurfaceLeftPreview() {
+private fun BoardgameSurfaceLeftPreview() {
     HireMeTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            BoardgameModalSurface(
+            BoardgameSurface(
                 shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
                 backgroundColor = MaterialTheme.colorScheme.surface,
-                edges = BoardgameModalExtrusionEdges.Left,
+                edges = BoardgameExtrusionEdges.Left,
                 modifier = Modifier.padding(16.dp),
             ) {
                 Text(text = "Bottom sheet content", modifier = Modifier.padding(24.dp))
@@ -101,16 +101,33 @@ private fun BoardgameModalSurfaceLeftPreview() {
 
 @Composable
 @Preview
-private fun BoardgameModalSurfaceLeftAndBottomPreview() {
+private fun BoardgameSurfaceLeftAndBottomPreview() {
     HireMeTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            BoardgameModalSurface(
+            BoardgameSurface(
                 shape = RoundedCornerShape(16.dp),
                 backgroundColor = MaterialTheme.colorScheme.surface,
-                edges = BoardgameModalExtrusionEdges.LeftAndBottom,
+                edges = BoardgameExtrusionEdges.LeftAndBottom,
                 modifier = Modifier.padding(16.dp),
             ) {
                 Text(text = "Dialog content", modifier = Modifier.padding(24.dp))
+            }
+        }
+    }
+}
+
+@Composable
+@Preview
+private fun BoardgameSurfaceLeftAndRightPreview() {
+    HireMeTheme {
+        Surface(color = MaterialTheme.colorScheme.surfaceDim) {
+            BoardgameSurface(
+                shape = RoundedCornerShape(16.dp),
+                backgroundColor = MaterialTheme.colorScheme.surfaceBright,
+                edges = BoardgameExtrusionEdges.LeftAndRight,
+                modifier = Modifier.padding(16.dp),
+            ) {
+                Text(text = "App frame content", modifier = Modifier.padding(24.dp))
             }
         }
     }

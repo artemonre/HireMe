@@ -10,8 +10,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.artemonre.hireme.components.BoardgameModalExtrusionEdges
-import com.artemonre.hireme.components.BoardgameModalSurface
+import com.artemonre.hireme.components.BoardgameExtrusionEdges
+import com.artemonre.hireme.components.BoardgameSurface
 
 private val PortfolioModalShape = RoundedCornerShape(16.dp)
 private const val PortfolioModalMaxHeightFraction = 0.8f
@@ -26,10 +26,10 @@ actual fun PortfolioModal(onDismissRequest: () -> Unit, content: @Composable () 
             (LocalWindowInfo.current.containerSize.height * PortfolioModalMaxHeightFraction).toDp()
         }
 
-        BoardgameModalSurface(
+        BoardgameSurface(
             shape = PortfolioModalShape,
             backgroundColor = MaterialTheme.colorScheme.surface,
-            edges = BoardgameModalExtrusionEdges.LeftAndBottom,
+            edges = BoardgameExtrusionEdges.LeftAndBottom,
             modifier = Modifier.widthIn(max = 480.dp).heightIn(max = maxHeight),
         ) {
             content()
