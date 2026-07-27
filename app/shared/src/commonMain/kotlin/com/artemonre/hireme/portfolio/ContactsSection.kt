@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -53,11 +56,7 @@ fun ContactsSection(contacts: List<PortfolioContact>, isWideScreen: Boolean, sna
         Text(
             text = if (isWideScreen) ContactsFullTitle else "Contacts",
             style = MaterialTheme.typography.titleMedium,
-            modifier = if (isWideScreen) {
-                Modifier.fillMaxWidth()
-            } else {
-                Modifier.fillMaxWidth().clickable { showContactsList = true }
-            },
+            modifier = if (isWideScreen) Modifier else Modifier.clickable { showContactsList = true },
         )
         // On wide screens contacts sit right here, always visible. On narrow screens, tapping
         // the header above opens a bottom sheet instead (same pattern as ExperienceSection).
@@ -69,7 +68,12 @@ fun ContactsSection(contacts: List<PortfolioContact>, isWideScreen: Boolean, sna
 
     if (!isWideScreen && showContactsList) {
         PortfolioModal(onDismissRequest = { showContactsList = false }) {
-            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 8.dp),
+            ) {
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = ContactsFullTitle,
@@ -100,19 +104,25 @@ private fun ContactLink(contact: PortfolioContact, uriHandler: UriHandler, snack
         }
     }
 
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .copyOnSecondaryClick(onCopy = copyToClipboard)
+            .combinedClickable(
+                onClick = { uriHandler.openUri(contact.url) },
+                onLongClick = copyToClipboard,
+            )
+    ) {
         Text(
-            text = contact.label,
+            text = "${contact.label}: ",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .copyOnSecondaryClick(onCopy = copyToClipboard)
-                .combinedClickable(
-                    onClick = { uriHandler.openUri(contact.url) },
-                    onLongClick = copyToClipboard,
-                )
-                .padding(vertical = 8.dp),
         )
+        Text(
+            text = contact.value,
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        Spacer(Modifier.width(4.dp))
         ContactCopyButton(onCopy = copyToClipboard)
     }
 }

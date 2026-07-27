@@ -13,6 +13,7 @@ val Typography = Typography(
         fontSize = 57.sp,
         lineHeight = 64.sp,
         letterSpacing = (-0.25).sp,
+        platformStyle = platformTextStyle,
     ),
     displayMedium = TextStyle(
         fontFamily = FontFamily.Default,
@@ -20,6 +21,7 @@ val Typography = Typography(
         fontSize = 45.sp,
         lineHeight = 52.sp,
         letterSpacing = 0.sp,
+        platformStyle = platformTextStyle,
     ),
     displaySmall = TextStyle(
         fontFamily = FontFamily.Default,
@@ -27,6 +29,7 @@ val Typography = Typography(
         fontSize = 36.sp,
         lineHeight = 44.sp,
         letterSpacing = 0.sp,
+        platformStyle = platformTextStyle,
     ),
     headlineLarge = TextStyle(
         fontFamily = FontFamily.Default,
@@ -34,6 +37,7 @@ val Typography = Typography(
         fontSize = 32.sp,
         lineHeight = 40.sp,
         letterSpacing = 0.sp,
+        platformStyle = platformTextStyle,
     ),
     headlineMedium = TextStyle(
         fontFamily = FontFamily.Default,
@@ -41,6 +45,7 @@ val Typography = Typography(
         fontSize = 28.sp,
         lineHeight = 36.sp,
         letterSpacing = 0.sp,
+        platformStyle = platformTextStyle,
     ),
     headlineSmall = TextStyle(
         fontFamily = FontFamily.Default,
@@ -48,6 +53,7 @@ val Typography = Typography(
         fontSize = 24.sp,
         lineHeight = 32.sp,
         letterSpacing = 0.sp,
+        platformStyle = platformTextStyle,
     ),
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
@@ -55,6 +61,7 @@ val Typography = Typography(
         fontSize = 22.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.sp,
+        platformStyle = platformTextStyle,
     ),
     titleMedium = TextStyle(
         fontFamily = FontFamily.Default,
@@ -62,6 +69,7 @@ val Typography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.15.sp,
+        platformStyle = platformTextStyle,
     ),
     titleSmall = TextStyle(
         fontFamily = FontFamily.Default,
@@ -69,6 +77,7 @@ val Typography = Typography(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.1.sp,
+        platformStyle = platformTextStyle,
     ),
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
@@ -76,6 +85,7 @@ val Typography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp,
+        platformStyle = platformTextStyle,
     ),
     bodyMedium = TextStyle(
         fontFamily = FontFamily.Default,
@@ -83,6 +93,7 @@ val Typography = Typography(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.25.sp,
+        platformStyle = platformTextStyle,
     ),
     bodySmall = TextStyle(
         fontFamily = FontFamily.Default,
@@ -90,6 +101,7 @@ val Typography = Typography(
         fontSize = 12.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.4.sp,
+        platformStyle = platformTextStyle,
     ),
     labelLarge = TextStyle(
         fontFamily = FontFamily.Default,
@@ -97,6 +109,7 @@ val Typography = Typography(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.1.sp,
+        platformStyle = platformTextStyle,
     ),
     labelMedium = TextStyle(
         fontFamily = FontFamily.Default,
@@ -104,6 +117,7 @@ val Typography = Typography(
         fontSize = 12.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp,
+        platformStyle = platformTextStyle,
     ),
     labelSmall = TextStyle(
         fontFamily = FontFamily.Default,
@@ -111,5 +125,6 @@ val Typography = Typography(
         fontSize = 11.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp,
+        platformStyle = platformTextStyle,
     ),
 )

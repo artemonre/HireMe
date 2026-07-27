@@ -20,7 +20,7 @@ import com.artemonre.hireme.theme.ThemeMode
 fun AppNavigation(
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
-    onAvatarPositioned: (center: Offset, radiusPx: Float) -> Unit,
+    onHeaderPositioned: (center: Offset, radiusPx: Float) -> Unit,
 ) {
     val backStack = remember { mutableStateListOf<Route>(PortfolioRoute) }
 
@@ -32,7 +32,7 @@ fun AppNavigation(
                 PortfolioScreen(
                     themeMode = themeMode,
                     onThemeModeChange = onThemeModeChange,
-                    onAvatarPositioned = onAvatarPositioned,
+                    onHeaderPositioned = onHeaderPositioned,
                 )
             }
         },
@@ -48,7 +48,7 @@ private fun AppNavigationPreview() {
             AppNavigation(
                 themeMode = themeMode,
                 onThemeModeChange = { themeMode = it },
-                onAvatarPositioned = { _, _ -> },
+                onHeaderPositioned = { _, _ -> },
             )
         }
     }
