@@ -53,6 +53,10 @@ private val monthAbbreviations = listOf(
 
 private enum class ExperienceExpansion { COLLAPSED, HALF_EXPANDED, EXPANDED }
 
+// Room for BoardgameCardSurface's drop shadow to bleed into within animateContentSize's clip
+// bounds — see the comment where this is used.
+private val ShadowClipBuffer = 8.dp
+
 @Suppress("DEPRECATION")
 private fun LocalDate.formatMonthYear(): String = "${monthAbbreviations[monthNumber - 1]} $year"
 
@@ -96,11 +100,16 @@ fun ExperienceSection(experience: List<Experience>) {
 
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val isWideScreen = maxWidth >= WideLayoutBreakpoint
+        // Half-expanded shows compact preview cards at a third of the available width (matching
+        // ProjectsSection's card-width convention) rather than stretching them full width like the
+        // expanded, full-detail cards.
+        val halfExpandedCardWidth = (maxWidth - ScreenPadding * 2) / 3
 
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenPadding)) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = ScreenPadding)
                     .clickable {
                         if (isWideScreen) {
                             expansion = if (expansion == ExperienceExpansion.COLLAPSED) {
@@ -142,7 +151,17 @@ fun ExperienceSection(experience: List<Experience>) {
             if (isWideScreen && expansion != ExperienceExpansion.COLLAPSED) {
                 Spacer(Modifier.height(8.dp))
                 Column(
-                    modifier = Modifier.fillMaxWidth().animateContentSize(),
+                    // animateContentSize clips its content to its own bounds during size
+                    // animations, which would otherwise slice off the cards' drop shadow — it
+                    // has no margin of its own to bleed into since cards are flush with this
+                    // Column's edges. Padding equal to ScreenPadding on the sides (matching the
+                    // rest of the screen's margin) and a small shadow-sized buffer on the bottom
+                    // (no sibling below the last card to supply spacing) keeps the shadow inside
+                    // this Column's own bounds instead of relying on unclipped ancestor space.
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateContentSize()
+                        .padding(horizontal = ScreenPadding, vertical = ShadowClipBuffer),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     experience.forEach { entry ->
@@ -157,6 +176,11 @@ fun ExperienceSection(experience: List<Experience>) {
                                 null
                             },
                             uriHandler = uriHandler,
+                            modifier = if (expansion == ExperienceExpansion.HALF_EXPANDED) {
+                                Modifier.width(halfExpandedCardWidth)
+                            } else {
+                                Modifier.fillMaxWidth()
+                            },
                         )
                     }
                 }

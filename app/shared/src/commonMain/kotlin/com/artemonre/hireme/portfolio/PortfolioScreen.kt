@@ -101,6 +101,10 @@ private fun GraphicsLayerScope.applySurfaceFlipCameraDistance() {
 @Composable
 fun PortfolioScreen(
     profile: PortfolioProfile = myProfile,
+    // A separate profile for ProfileHeader's back face — its own instance, independent of
+    // `profile`, so it can be edited later without touching the front face's data. Qualified
+    // reference because the parameter's own name shadows the top-level `altProfile` here.
+    altProfile: PortfolioProfile = com.artemonre.hireme.portfolio.altProfile,
     themeMode: ThemeMode = ThemeMode.SYSTEM,
     onThemeModeChange: (ThemeMode) -> Unit = {},
 ) {
@@ -190,6 +194,7 @@ fun PortfolioScreen(
             ) {
                 PortfolioScreenContent(
                     profile = profile,
+                    altProfile = altProfile,
                     themeMode = themeMode,
                     onThemeModeChange = flippingOnThemeModeChange,
                     snackbarHostState = snackbarHostState,
@@ -222,6 +227,7 @@ fun PortfolioScreen(
 @Composable
 private fun PortfolioScreenContent(
     profile: PortfolioProfile,
+    altProfile: PortfolioProfile,
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -276,6 +282,7 @@ private fun PortfolioScreenContent(
                 ) {
                     ProfileHeader(
                         profile = profile,
+                        altProfile = altProfile,
                         modifier = Modifier
                             .width(ProfileCardWideWidth)
                             .onGloballyPositioned { profileHeaderHeightPx = it.size.height },
@@ -302,6 +309,7 @@ private fun PortfolioScreenContent(
                     // (which would double up with ContactsSection's own padding).
                     ProfileHeader(
                         profile = profile,
+                        altProfile = altProfile,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = ScreenPadding),
