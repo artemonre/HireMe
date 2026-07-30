@@ -5,8 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -44,17 +45,21 @@ fun BoardgameCardSurface(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .offset(x = -BoardgameCardSurfaceExtrusionOffset, y = BoardgameCardSurfaceExtrusionOffset)
                 .shadow(elevation = BoardgameCardSurfaceElevation, shape = shape)
                 .clip(shape)
                 .background(sideColor),
         )
 
-        // Deliberately not matchParentSize — unlike BoardgameCardVertical/Chip (which are given a
-        // fixed aspect ratio or size by their caller), this front face's wrap-content size is what
-        // determines the outer Box's size, which the side face's matchParentSize then follows.
+        // Inset the front face from the shared box (rather than offsetting the side face outward,
+        // like BoardgameCardVertical/Chip) so the peek stays within these bounds — this surface is
+        // used inside ancestors that clip to their own bounds (a scrolling modal, an
+        // animateContentSize list), where an outward offset gets cut off. Same technique as
+        // BoardgameTablet. fillMaxWidth keeps the front face matching the side face's width instead
+        // of wrapping its (possibly narrower) content.
         Box(
             modifier = Modifier
+                .padding(start = BoardgameCardSurfaceExtrusionOffset, bottom = BoardgameCardSurfaceExtrusionOffset)
+                .fillMaxWidth()
                 .clip(shape)
                 .background(
                     Brush.linearGradient(
@@ -80,7 +85,7 @@ private fun BoardgameCardSurfacePreview() {
             BoardgameCardSurface(
                 shape = RoundedCornerShape(12.dp),
                 backgroundColor = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(16.dp).width(220.dp),
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(text = "Title", color = MaterialTheme.colorScheme.onSecondary)
