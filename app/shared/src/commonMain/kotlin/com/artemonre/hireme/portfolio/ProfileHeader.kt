@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.InteractionSource
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -28,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultCameraDistance
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
@@ -41,11 +44,13 @@ import com.artemonre.hireme.components.BoardgameCardAspectRatio
 import com.artemonre.hireme.components.BoardgameCardVertical
 import com.artemonre.hireme.theme.HireMeTheme
 import hireme.app.shared.generated.resources.Res
+import hireme.app.shared.generated.resources.flip_arrow_icon
 import hireme.app.shared.generated.resources.user_photo
 import hireme.app.shared.generated.resources.user_photo_alt
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.imageResource
+import org.jetbrains.compose.resources.painterResource
 
 // Tapping the card's bottom-right corner flips it 180 degrees around its vertical axis, the same
 // physical-card motion as the app's theme-switch flip (see PortfolioScreen's SurfaceFlip*
@@ -61,6 +66,7 @@ private const val ProfileFlipDurationMillis = 550
 // height.
 private const val FlipZoneWidthFraction = 0.5f
 private const val FlipZoneHeightFraction = 0.125f
+private val FlipIconSize = 20.dp
 
 private fun GraphicsLayerScope.applyProfileFlipCameraDistance() {
     cameraDistance = if (size.width > 0f) (size.width * ProfileFlipDepthToWidthRatio) / 72f else DefaultCameraDistance
@@ -165,6 +171,7 @@ fun ProfileHeader(
                 },
         ) {
             ProfileHeaderFace(profile = profile, image = Res.drawable.user_photo, modifier = Modifier.fillMaxSize())
+            FlipHintIcon(modifier = Modifier.align(Alignment.BottomEnd))
         }
 
         Box(
@@ -177,8 +184,13 @@ fun ProfileHeader(
                 },
         ) {
             ProfileHeaderFace(profile = altProfile, image = Res.drawable.user_photo_alt, modifier = Modifier.fillMaxSize())
+            FlipHintIcon(modifier = Modifier.align(Alignment.BottomEnd))
         }
 
+        // Unrotated — hit-testing needs to stay anchored to this fixed screen corner throughout
+        // the flip, regardless of which (rotating) face is currently showing. The visible hint
+        // lives inside each face's own rotating layer above instead, so it's the icon's *look*
+        // that flips with the card, while the tap target underneath it never moves.
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -187,6 +199,16 @@ fun ProfileHeader(
                 .clickable(interactionSource = null, indication = rememberTapCircleIndication(), onClick = flip),
         )
     }
+}
+
+@Composable
+private fun FlipHintIcon(modifier: Modifier = Modifier) {
+    Image(
+        painter = painterResource(Res.drawable.flip_arrow_icon),
+        contentDescription = null,
+        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondaryContainer),
+        modifier = modifier.padding(8.dp).size(FlipIconSize),
+    )
 }
 
 @Composable
