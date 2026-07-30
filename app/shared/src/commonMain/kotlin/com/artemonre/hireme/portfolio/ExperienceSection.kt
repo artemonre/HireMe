@@ -2,7 +2,6 @@ package com.artemonre.hireme.portfolio
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -18,7 +17,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,16 +29,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.artemonre.hireme.components.BoardgameCardSurface
 import com.artemonre.hireme.theme.HireMeTheme
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -56,6 +52,10 @@ private val monthAbbreviations = listOf(
 )
 
 private enum class ExperienceExpansion { COLLAPSED, HALF_EXPANDED, EXPANDED }
+
+// Room for BoardgameCardSurface's drop shadow to bleed into within animateContentSize's clip
+// bounds — see the comment where this is used.
+private val ShadowClipBuffer = 8.dp
 
 @Suppress("DEPRECATION")
 private fun LocalDate.formatMonthYear(): String = "${monthAbbreviations[monthNumber - 1]} $year"
@@ -95,21 +95,21 @@ fun ExperienceSection(experience: List<Experience>) {
     // guaranteed to stay consistent across light/dark themes or future palette edits.
     val cardColor = MaterialTheme.colorScheme.secondary
     val cardTextColor = MaterialTheme.colorScheme.onSecondary
-    val cardGradient = Brush.linearGradient(
-        colors = listOf(cardColor, cardColor.copy(alpha = 0.95f)),
-        start = Offset(0f, Float.POSITIVE_INFINITY),
-        end = Offset(Float.POSITIVE_INFINITY, 0f),
-    )
     var expansion by remember { mutableStateOf(ExperienceExpansion.COLLAPSED) }
     var showBottomSheet by remember { mutableStateOf(false) }
 
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val isWideScreen = maxWidth >= WideLayoutBreakpoint
+        // Half-expanded shows compact preview cards at a third of the available width (matching
+        // ProjectsSection's card-width convention) rather than stretching them full width like the
+        // expanded, full-detail cards.
+        val halfExpandedCardWidth = (maxWidth - ScreenPadding * 2) / 3
 
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenPadding)) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = ScreenPadding)
                     .clickable {
                         if (isWideScreen) {
                             expansion = if (expansion == ExperienceExpansion.COLLAPSED) {
@@ -151,13 +151,23 @@ fun ExperienceSection(experience: List<Experience>) {
             if (isWideScreen && expansion != ExperienceExpansion.COLLAPSED) {
                 Spacer(Modifier.height(8.dp))
                 Column(
-                    modifier = Modifier.fillMaxWidth().animateContentSize(),
+                    // animateContentSize clips its content to its own bounds during size
+                    // animations, which would otherwise slice off the cards' drop shadow — it
+                    // has no margin of its own to bleed into since cards are flush with this
+                    // Column's edges. Padding equal to ScreenPadding on the sides (matching the
+                    // rest of the screen's margin) and a small shadow-sized buffer on the bottom
+                    // (no sibling below the last card to supply spacing) keeps the shadow inside
+                    // this Column's own bounds instead of relying on unclipped ancestor space.
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateContentSize()
+                        .padding(horizontal = ScreenPadding, vertical = ShadowClipBuffer),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     experience.forEach { entry ->
                         ExperienceCard(
                             entry = entry,
-                            cardGradient = cardGradient,
+                            cardColor = cardColor,
                             cardTextColor = cardTextColor,
                             showFullDetail = expansion == ExperienceExpansion.EXPANDED,
                             onClick = if (expansion == ExperienceExpansion.HALF_EXPANDED) {
@@ -166,6 +176,11 @@ fun ExperienceSection(experience: List<Experience>) {
                                 null
                             },
                             uriHandler = uriHandler,
+                            modifier = if (expansion == ExperienceExpansion.HALF_EXPANDED) {
+                                Modifier.width(halfExpandedCardWidth)
+                            } else {
+                                Modifier.fillMaxWidth()
+                            },
                         )
                     }
                 }
@@ -185,7 +200,7 @@ fun ExperienceSection(experience: List<Experience>) {
                 experience.forEach { entry ->
                     ExperienceCard(
                         entry = entry,
-                        cardGradient = cardGradient,
+                        cardColor = cardColor,
                         cardTextColor = cardTextColor,
                         showFullDetail = true,
                         onClick = null,
@@ -200,20 +215,19 @@ fun ExperienceSection(experience: List<Experience>) {
 @Composable
 private fun ExperienceCard(
     entry: Experience,
-    cardGradient: Brush,
+    cardColor: Color,
     cardTextColor: Color,
     showFullDetail: Boolean,
     onClick: (() -> Unit)?,
     uriHandler: UriHandler,
     modifier: Modifier = Modifier,
 ) {
-    Card(
+    BoardgameCardSurface(
+        shape = CardDefaults.shape,
+        backgroundColor = cardColor,
         modifier = modifier
             .fillMaxWidth()
-            .clip(CardDefaults.shape)
-            .background(cardGradient)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(entry.title, style = MaterialTheme.typography.titleSmall, color = cardTextColor)

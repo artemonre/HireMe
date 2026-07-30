@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -20,7 +19,6 @@ import com.artemonre.hireme.theme.ThemeMode
 fun AppNavigation(
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
-    onHeaderPositioned: (center: Offset, radiusPx: Float) -> Unit,
 ) {
     val backStack = remember { mutableStateListOf<Route>(PortfolioRoute) }
 
@@ -32,7 +30,6 @@ fun AppNavigation(
                 PortfolioScreen(
                     themeMode = themeMode,
                     onThemeModeChange = onThemeModeChange,
-                    onHeaderPositioned = onHeaderPositioned,
                 )
             }
         },
@@ -48,7 +45,6 @@ private fun AppNavigationPreview() {
             AppNavigation(
                 themeMode = themeMode,
                 onThemeModeChange = { themeMode = it },
-                onHeaderPositioned = { _, _ -> },
             )
         }
     }
