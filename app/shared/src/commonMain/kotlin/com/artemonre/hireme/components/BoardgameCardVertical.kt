@@ -115,7 +115,7 @@ fun BoardgameCardVertical(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
@@ -136,7 +136,7 @@ fun BoardgameCardVertical(
                     text = description,
                     style = MaterialTheme.typography.bodySmall.copy(color = descriptionColor),
                     textAlign = TextAlign.Center,
-                    maxLines = 4,
+                    maxLines = 6,
                     overflow = TextOverflow.Ellipsis,
                 )
             }

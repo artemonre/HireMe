@@ -201,7 +201,7 @@ private fun ProfileHeaderFace(
         image = imageResource(image),
         title = profile.name,
         subtitle = profile.title,
-        description = profile.tagline,
+        description = profile.shortDescription,
         backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
         titleColor = MaterialTheme.colorScheme.onPrimaryContainer,
         subtitleColor = MaterialTheme.colorScheme.onPrimaryContainer,

@@ -38,8 +38,8 @@ data class Project(
 data class PortfolioProfile(
     val name: String,
     val title: String,
+    val shortDescription: String,
     val bio: String,
-    val tagline: String,
     val skills: List<Skill>,
     val experience: List<Experience>,
     val projects: List<Project>,
@@ -296,10 +296,14 @@ private val profileServerTechnologies = listOf("Firebase", "GitHub Actions")
 val myProfile = PortfolioProfile(
     name = "Artem Balzan",
     title = "Senior Android developer",
+    shortDescription = "Focused on building new things, adopting new tech fast, and steadily improving what already exists. Curiosity-driven, hands-on, and always picking up the next framework or tool.",
     bio = """
-        Passionate about learning and adopting new technologies, which is where I perform best — on new builds or projects undergoing change and migration. I bring broad experience both building products from scratch and modernizing existing ones.
+        I'm a Senior Android Developer with 7+ years of experience building native Android apps end to end — from architecture through release and maintenance. I've mostly worked as the sole or lead developer rather than one of many hands on a team: at Preon, I built an app from scratch solo, including a Huawei Mobile Services integration, delivering an MVP in three months; at Ru-you, I shipped 10+ apps solo, owning the full cycle.
+        
+        I actively look for ways to improve what exists, not just maintain it. At Lectera, I proposed and led the migration from RxJava to Kotlin Coroutines and Flow, cutting boilerplate by ~20%, and later drove the Media2-to-Media3 migration. I also raised crash-free sessions to 98–99% and improved our Google Play rating through continuous, feedback-driven work.
+        
+        I take initiative rather than wait to be told what to fix, and collaborate well with cross-functional teams and clients, while staying open to new technologies that genuinely add value.
     """.trimIndent(),
-    tagline = "Thrives on new builds and modernizing legacy systems — always learning, always adapting.",
     skills = profileSkills,
     experience = profileExperience,
     projects = profileProjects,
@@ -311,11 +315,11 @@ val myProfile = PortfolioProfile(
 
 val altProfile = PortfolioProfile(
     name = "Artem Balzan",
-    title = "Senior Android developer",
+    title = "Very Senior Android developer",
+    shortDescription = "Half-packed for Japan, mid-anime always. Hoards board games and video games like a job. New tech is the real hobby — collecting frameworks like Pokemon cards. New or shiny? I'm in.",
     bio = """
         Passionate about learning and adopting new technologies, which is where I perform best — on new builds or projects undergoing change and migration. I bring broad experience both building products from scratch and modernizing existing ones.
     """.trimIndent(),
-    tagline = "Thrives on new builds and modernizing legacy systems — always learning, always adapting.",
     skills = profileSkills,
     experience = profileExperience,
     projects = profileProjects,
