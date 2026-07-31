@@ -47,6 +47,7 @@ private val ChipHorizontalSpacing = 8.dp
 private val ChipVerticalSpacing = 8.dp
 private val TitleToChipsGap = 8.dp
 private const val NarrowMaxVisibleSkills = 10
+private const val WideMaxRows = 4
 
 @Composable
 fun SkillsSection(skills: List<Skill>, isWideScreen: Boolean, modifier: Modifier = Modifier) {
@@ -172,7 +173,7 @@ private fun WideSkillsContent(
                 chipPlaceables.take(visibleCount) + overflowPlaceable
             }
             val rows = packIntoRows(rowInput, constraints.maxWidth, hSpacing)
-            if (rowsHeight(rows, vSpacing) <= chipsMaxHeight) {
+            if (rows.size <= WideMaxRows && rowsHeight(rows, vSpacing) <= chipsMaxHeight) {
                 chosenRows = rows
                 break
             }
