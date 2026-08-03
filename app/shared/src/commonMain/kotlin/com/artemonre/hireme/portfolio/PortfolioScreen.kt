@@ -5,6 +5,7 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -17,12 +18,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -41,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultCameraDistance
 import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.ImageBitmap
@@ -49,14 +58,22 @@ import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.artemonre.hireme.components.BoardgameExtrusionEdges
 import com.artemonre.hireme.components.BoardgameTablet
 import com.artemonre.hireme.theme.HireMeTheme
 import com.artemonre.hireme.theme.ThemeMode
+import com.artemonre.hireme.theme.isDark
 import com.artemonre.hireme.theme.surfaceDimLight
+import hireme.app.shared.generated.resources.Res
+import hireme.app.shared.generated.resources.alex_brush_regular
+import hireme.app.shared.generated.resources.theme_icon
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.Font
+import org.jetbrains.compose.resources.painterResource
 
 private val ThemeMode.label: String
     get() = name.lowercase().replaceFirstChar { it.uppercase() }
@@ -73,6 +90,13 @@ private val PortfolioCardShape = RoundedCornerShape(16.dp)
 // (matching the contacts/skills column next to it), while the narrow/mobile layout instead
 // gives it fillMaxWidth() so the card stretches close to the screen width.
 private val ProfileCardWideWidth = 240.dp
+
+// Disclosure line shown as a footer, just below TechnologiesSection.
+private const val AiDisclosureText = "Built hand-in-hand with Claude"
+
+// Matches ProfileHeader's FlipHintIcon convention: a custom flat glyph tinted via ColorFilter,
+// since the project only depends on material-icons-core, which has no theme/brightness icon.
+private val ThemeIconSize = 20.dp
 
 // The margin around the card is a fixed color rather than a theme color deliberately: it reads as
 // the "table" the tablet card sits on, which isn't meant to change look with the card's own
@@ -116,26 +140,34 @@ fun PortfolioScreen(
     var oldSurfaceSnapshot by remember { mutableStateOf<ImageBitmap?>(null) }
     val surfaceSnapshotLayer = rememberGraphicsLayer()
     val scope = rememberCoroutineScope()
+    val systemDark = isSystemInDarkTheme()
 
     val flippingOnThemeModeChange: (ThemeMode) -> Unit = { mode ->
-        scope.launch {
-            // Capture the surface's current (still old-themed) frame before the state change
-            // below causes it to recompose with the new theme's colors.
-            val snapshot = surfaceSnapshotLayer.toImageBitmap()
-            // Snap here, in the same coroutine as the snapshot/mode change, so the very first
-            // frame drawn with the new snapshot already starts the flip from its beginning.
-            // Doing this later (e.g. in a LaunchedEffect keyed on the snapshot) leaves a stray
-            // frame where the rotation still holds its previous end value (180, fully flipped),
-            // which briefly renders the new theme unflipped before snapping back and replaying
-            // the flip.
-            surfaceFlipRotation.snapTo(0f)
-            oldSurfaceSnapshot = snapshot
+        // Only the rendered light/dark value changing warrants a flip — e.g. clicking SYSTEM
+        // while it happens to already match the current explicit mode's colors shouldn't play
+        // the animation, even though the selection itself still needs to update.
+        if (themeMode.isDark(systemDark) != mode.isDark(systemDark)) {
+            scope.launch {
+                // Capture the surface's current (still old-themed) frame before the state change
+                // below causes it to recompose with the new theme's colors.
+                val snapshot = surfaceSnapshotLayer.toImageBitmap()
+                // Snap here, in the same coroutine as the snapshot/mode change, so the very first
+                // frame drawn with the new snapshot already starts the flip from its beginning.
+                // Doing this later (e.g. in a LaunchedEffect keyed on the snapshot) leaves a stray
+                // frame where the rotation still holds its previous end value (180, fully flipped),
+                // which briefly renders the new theme unflipped before snapping back and replaying
+                // the flip.
+                surfaceFlipRotation.snapTo(0f)
+                oldSurfaceSnapshot = snapshot
+                onThemeModeChange(mode)
+            }
+        } else {
             onThemeModeChange(mode)
         }
     }
 
-    // Keyed on the snapshot itself (not on themeMode) so a mode change that doesn't actually
-    // flip light/dark still clears the snapshot instead of leaving it stuck.
+    // oldSurfaceSnapshot is only ever set right before a real flip starts, so this just animates
+    // the captured frame back to rest and clears it once that flip has played out.
     LaunchedEffect(oldSurfaceSnapshot) {
         if (oldSurfaceSnapshot != null) {
             surfaceFlipRotation.animateTo(
@@ -237,26 +269,21 @@ private fun PortfolioScreenContent(
         modifier = modifier.verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = ScreenPadding)
-                .padding(top = ScreenPadding),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            SingleChoiceSegmentedButtonRow {
-                ThemeMode.entries.forEachIndexed { index, mode ->
-                    SegmentedButton(
-                        selected = themeMode == mode,
-                        onClick = { onThemeModeChange(mode) },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = ThemeMode.entries.size,
-                        ),
-                        icon = {},
-                        label = { Text(mode.label) },
-                    )
-                }
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val isWideScreen = maxWidth >= WideLayoutBreakpoint
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = ScreenPadding)
+                    .padding(top = ScreenPadding),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                ThemeModeControl(
+                    themeMode = themeMode,
+                    onThemeModeChange = onThemeModeChange,
+                    isWideScreen = isWideScreen,
+                )
             }
         }
 
@@ -336,6 +363,72 @@ private fun PortfolioScreenContent(
 
         Spacer(Modifier.height(24.dp))
         TechnologiesSection(profile.applicationTechnologies, profile.serverTechnologies)
+
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = AiDisclosureText,
+            fontFamily = FontFamily(Font(Res.font.alex_brush_regular)),
+            fontSize = 32.sp,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenPadding),
+        )
+        Spacer(Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun ThemeModeControl(
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit,
+    isWideScreen: Boolean,
+) {
+    if (isWideScreen) {
+        SingleChoiceSegmentedButtonRow {
+            ThemeMode.entries.forEachIndexed { index, mode ->
+                SegmentedButton(
+                    selected = themeMode == mode,
+                    onClick = { onThemeModeChange(mode) },
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = ThemeMode.entries.size,
+                    ),
+                    icon = {},
+                    label = { Text(mode.label) },
+                )
+            }
+        }
+    } else {
+        // Three labeled segmented buttons crowd a narrow screen, so it collapses to a single
+        // icon that opens the same three choices as a menu.
+        var menuExpanded by remember { mutableStateOf(false) }
+        Box {
+            IconButton(onClick = { menuExpanded = true }) {
+                Image(
+                    painter = painterResource(Res.drawable.theme_icon),
+                    contentDescription = "Change theme",
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                    modifier = Modifier.size(ThemeIconSize),
+                )
+            }
+            DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                ThemeMode.entries.forEach { mode ->
+                    DropdownMenuItem(
+                        text = { Text(mode.label) },
+                        leadingIcon = {
+                            Box(modifier = Modifier.size(24.dp)) {
+                                if (themeMode == mode) {
+                                    Icon(Icons.Filled.Check, contentDescription = null)
+                                }
+                            }
+                        },
+                        onClick = {
+                            onThemeModeChange(mode)
+                            menuExpanded = false
+                        },
+                    )
+                }
+            }
+        }
     }
 }
 
