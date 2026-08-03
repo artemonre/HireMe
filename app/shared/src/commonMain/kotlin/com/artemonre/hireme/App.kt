@@ -14,16 +14,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.artemonre.hireme.navigation.AppNavigation
 import com.artemonre.hireme.theme.HireMeTheme
 import com.artemonre.hireme.theme.ThemeMode
+import com.artemonre.hireme.theme.isDark
 
 @Composable
 @Preview
 fun App() {
     var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
-    val darkTheme = when (themeMode) {
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-        ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-    }
+    val darkTheme = themeMode.isDark(isSystemInDarkTheme())
 
     HireMeTheme(darkTheme = darkTheme) {
         Surface(
