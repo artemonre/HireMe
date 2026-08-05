@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -266,7 +267,10 @@ private fun PortfolioScreenContent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.verticalScroll(rememberScrollState()),
+        // navigationBarsPadding() goes after verticalScroll() so the inset becomes extra
+        // scrollable bottom content, not a permanent cut into the viewport — otherwise the last
+        // section would sit flush behind (or under) a phone's on-screen gesture/nav bar.
+        modifier = modifier.verticalScroll(rememberScrollState()).navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {

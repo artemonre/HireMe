@@ -45,6 +45,7 @@ Gradle plugin/dependency versions are centralized in `gradle/libs.versions.toml`
 - Feature branches merge into `develop` by default, not `master`. Only merge into `master` when explicitly told to.
 - `develop` is the repo's default branch on GitHub (PR base, deletion-protected).
 - `git add` (by explicit path, never `-A`/`.`) every new or modified file that belongs in the project as soon as it's created/edited — don't leave it untracked for later, and don't wait to be asked. Skip files that are temp/incidental (build output, IDE crash artifacts, etc.); ask first if it's genuinely unclear whether a file belongs. Staging is not committing — commits and pushes still require an explicit ask each time.
+- When told to "commit" without being told what to commit, stage and commit *all* outstanding changes in the working tree (run `git status` first), not just whatever was staged incrementally during the current task — unless the outstanding changes are clearly separate, unrelated work, in which case ask before bundling them in.
 
 ## Coding guidelines
 

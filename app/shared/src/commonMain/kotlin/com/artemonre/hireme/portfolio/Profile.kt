@@ -288,7 +288,7 @@ private val profileContacts = listOf(
 )
 
 private val profileApplicationTechnologies =
-    listOf("Kotlin", "Jetpack Compose", "Compose Multiplatform", "Navigation3", "Koin")
+    listOf("Kotlin", "Jetpack Compose", "Compose Multiplatform", "Koin")
 
 private val profileServerTechnologies = listOf("Firebase", "GitHub Actions")
 
@@ -298,11 +298,9 @@ val myProfile = PortfolioProfile(
     title = "Senior Android developer",
     shortDescription = "Focused on building new things, adopting new tech fast, and steadily improving what already exists. Curiosity-driven, hands-on, and always picking up the next framework or tool.",
     bio = """
-        I'm a Senior Android Developer with 7+ years of experience building native Android apps end to end — from architecture through release and maintenance. I've mostly worked as the sole or lead developer rather than one of many hands on a team: at Preon, I built an app from scratch solo, including a Huawei Mobile Services integration, delivering an MVP in three months; at Ru-you, I shipped 10+ apps solo, owning the full cycle.
+        I'm a Senior Android Developer who enjoys building things from the ground up and owning them end to end — from early architecture decisions through to release and ongoing improvement. I like initiating change when something isn't working well, whether that means proposing a new approach to an existing system or picking up a new technology to solve a problem properly.
         
-        I actively look for ways to improve what exists, not just maintain it. At Lectera, I proposed and led the migration from RxJava to Kotlin Coroutines and Flow, cutting boilerplate by ~20%, and later drove the Media2-to-Media3 migration. I also raised crash-free sessions to 98–99% and improved our Google Play rating through continuous, feedback-driven work.
-        
-        I take initiative rather than wait to be told what to fix, and collaborate well with cross-functional teams and clients, while staying open to new technologies that genuinely add value.
+        Learning is a constant part of how I work and who I am — I enjoy exploring new tools, languages, and ideas, both in programming and outside of it, and I'm usually the one pushing to adopt something better rather than sticking with what's familiar. I've mostly worked as the sole developer across the teams I've been part of, so I'm used to being self-directed, communicating directly with clients and teammates, and following through on what I start.
     """.trimIndent(),
     skills = profileSkills,
     experience = profileExperience,
@@ -318,7 +316,11 @@ val altProfile = PortfolioProfile(
     title = "Very Senior Android developer",
     shortDescription = "Half-packed for Japan, mid-anime always. Hoards board games and video games like a job. New tech is the real hobby — collecting frameworks like Pokemon cards. New or shiny? I'm in.",
     bio = """
-        Passionate about learning and adopting new technologies, which is where I perform best — on new builds or projects undergoing change and migration. I bring broad experience both building products from scratch and modernizing existing ones.
+        I'm a Senior Android Developer who likes building things from scratch and owning them end to end — and honestly, the same curiosity that makes me want to poke at a new codebase until I understand it also shows up in pretty much everything else I do.
+        
+        I actually learned to speak English by explaining board game rules to people — turns out nothing forces you to communicate clearly like trying to convince someone why they can't do that move. These days I still play a lot, and if a game is good, I'm not stopping until I've got 100% of the achievements. Half-finished doesn't sit well with me, in games or in code.
+        
+        I travel every chance I get, mostly for the excuse to get lost somewhere new and figure out how people there actually live, think, and joke around — it's the same instinct that makes me want to pick up a new framework or language just to see how it works. New places, new people, new tech: same appeal, different flavor.
     """.trimIndent(),
     skills = profileSkills,
     experience = profileExperience,
