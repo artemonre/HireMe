@@ -143,12 +143,18 @@ fun ProfileHeader(
 ) {
     var isFlipped by remember { mutableStateOf(false) }
     var isFlipping by remember { mutableStateOf(false) }
+    // The alt face is a full second card (its own shadow, gradient, image, and text), so it's
+    // left out of composition entirely until the first flip actually needs it — cheap here inside
+    // a scrollable list, where this composable is torn down and rebuilt from scratch every time it
+    // scrolls back into view, so paying for a face almost nobody ever looks at adds up.
+    var hasEverFlipped by remember { mutableStateOf(false) }
     val rotation = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
 
     val flip: () -> Unit = {
         if (!isFlipping) {
             isFlipping = true
+            hasEverFlipped = true
             scope.launch {
                 rotation.animateTo(
                     targetValue = if (isFlipped) 0f else 180f,
@@ -174,17 +180,19 @@ fun ProfileHeader(
             FlipHintIcon(modifier = Modifier.align(Alignment.BottomEnd))
         }
 
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .graphicsLayer {
-                    rotationY = rotation.value - 180f
-                    alpha = if (rotation.value >= ProfileFlipSwapThresholdDegrees) 1f else 0f
-                    applyProfileFlipCameraDistance()
-                },
-        ) {
-            ProfileHeaderFace(profile = altProfile, image = Res.drawable.user_photo_alt, modifier = Modifier.fillMaxSize())
-            FlipHintIcon(modifier = Modifier.align(Alignment.BottomEnd))
+        if (hasEverFlipped) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        rotationY = rotation.value - 180f
+                        alpha = if (rotation.value >= ProfileFlipSwapThresholdDegrees) 1f else 0f
+                        applyProfileFlipCameraDistance()
+                    },
+            ) {
+                ProfileHeaderFace(profile = altProfile, image = Res.drawable.user_photo_alt, modifier = Modifier.fillMaxSize())
+                FlipHintIcon(modifier = Modifier.align(Alignment.BottomEnd))
+            }
         }
 
         // Unrotated — hit-testing needs to stay anchored to this fixed screen corner throughout

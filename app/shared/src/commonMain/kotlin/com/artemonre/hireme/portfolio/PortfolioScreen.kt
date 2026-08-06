@@ -17,14 +17,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DropdownMenu
@@ -72,6 +74,7 @@ import com.artemonre.hireme.theme.surfaceDimLight
 import hireme.app.shared.generated.resources.Res
 import hireme.app.shared.generated.resources.alex_brush_regular
 import hireme.app.shared.generated.resources.theme_icon
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
@@ -140,6 +143,12 @@ fun PortfolioScreen(
     val surfaceFlipRotation = remember { Animatable(SurfaceFlipRestRotation) }
     var oldSurfaceSnapshot by remember { mutableStateOf<ImageBitmap?>(null) }
     val surfaceSnapshotLayer = rememberGraphicsLayer()
+    // Non-null only for the one frame between a flip being requested and drawWithContent below
+    // fulfilling it. record() is only ever invoked on demand this way rather than on every draw —
+    // continuously re-recording the whole scrollable page every frame (including every scroll
+    // frame, since this Box is an ancestor of the scrollable content) was expensive enough to
+    // visibly lag and overheat on mobile devices for a snapshot that's discarded almost every time.
+    var pendingSurfaceCapture by remember { mutableStateOf<CompletableDeferred<Unit>?>(null) }
     val scope = rememberCoroutineScope()
     val systemDark = isSystemInDarkTheme()
 
@@ -149,8 +158,12 @@ fun PortfolioScreen(
         // the animation, even though the selection itself still needs to update.
         if (themeMode.isDark(systemDark) != mode.isDark(systemDark)) {
             scope.launch {
-                // Capture the surface's current (still old-themed) frame before the state change
+                // Request a fresh recording of the surface's current (still old-themed) frame and
+                // wait for drawWithContent below to actually perform it, before the state change
                 // below causes it to recompose with the new theme's colors.
+                val captured = CompletableDeferred<Unit>()
+                pendingSurfaceCapture = captured
+                captured.await()
                 val snapshot = surfaceSnapshotLayer.toImageBitmap()
                 // Snap here, in the same coroutine as the snapshot/mode change, so the very first
                 // frame drawn with the new snapshot already starts the flip from its beginning.
@@ -204,8 +217,13 @@ fun PortfolioScreen(
                     applySurfaceFlipCameraDistance()
                 }
                 .drawWithContent {
-                    surfaceSnapshotLayer.record {
-                        this@drawWithContent.drawContent()
+                    val capture = pendingSurfaceCapture
+                    if (capture != null) {
+                        surfaceSnapshotLayer.record {
+                            this@drawWithContent.drawContent()
+                        }
+                        pendingSurfaceCapture = null
+                        capture.complete(Unit)
                     }
                     drawContent()
                 }
@@ -266,117 +284,127 @@ private fun PortfolioScreenContent(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        // navigationBarsPadding() goes after verticalScroll() so the inset becomes extra
-        // scrollable bottom content, not a permanent cut into the viewport — otherwise the last
-        // section would sit flush behind (or under) a phone's on-screen gesture/nav bar.
-        modifier = modifier.verticalScroll(rememberScrollState()).navigationBarsPadding(),
+    // Bottom contentPadding rather than a navigationBarsPadding() modifier on the LazyColumn
+    // itself — the latter would inset the list's own viewport (permanently shrinking visible
+    // space), where contentPadding instead adds it as extra scrollable space at the end, so the
+    // last item clears a phone's on-screen gesture/nav bar without cutting into the viewport.
+    val navigationBarsBottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = PaddingValues(bottom = navigationBarsBottomPadding),
     ) {
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val isWideScreen = maxWidth >= WideLayoutBreakpoint
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = ScreenPadding)
-                    .padding(top = ScreenPadding),
-                horizontalArrangement = Arrangement.End,
-            ) {
-                ThemeModeControl(
-                    themeMode = themeMode,
-                    onThemeModeChange = onThemeModeChange,
-                    isWideScreen = isWideScreen,
-                )
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val isWideScreen = maxWidth >= WideLayoutBreakpoint
-
-            if (isWideScreen) {
-                // Two columns, top-aligned: a fixed-width profile card on the start side, with
-                // contacts (and skills, beneath them) filling the rest of the row's width.
-                // Skills' height is capped so that column never grows past the profile card's
-                // height, scrolling internally instead of pushing the sections below it down.
-                var profileHeaderHeightPx by remember { mutableStateOf(0) }
-                var contactsHeightPx by remember { mutableStateOf(0) }
-                val density = LocalDensity.current
+        item {
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val isWideScreen = maxWidth >= WideLayoutBreakpoint
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = ScreenPadding),
-                    horizontalArrangement = Arrangement.spacedBy(ScreenPadding),
-                    verticalAlignment = Alignment.Top,
+                        .padding(horizontal = ScreenPadding)
+                        .padding(top = ScreenPadding),
+                    horizontalArrangement = Arrangement.End,
                 ) {
-                    ProfileHeader(
-                        profile = profile,
-                        altProfile = altProfile,
-                        modifier = Modifier
-                            .width(ProfileCardWideWidth)
-                            .onGloballyPositioned { profileHeaderHeightPx = it.size.height },
+                    ThemeModeControl(
+                        themeMode = themeMode,
+                        onThemeModeChange = onThemeModeChange,
+                        isWideScreen = isWideScreen,
                     )
-                    Column(modifier = Modifier.weight(1f)) {
-                        Box(modifier = Modifier.onGloballyPositioned { contactsHeightPx = it.size.height }) {
-                            ContactsSection(profile.contacts, isWideScreen = true, snackbarHostState = snackbarHostState)
-                        }
-                        Spacer(Modifier.height(24.dp))
-                        val skillsMaxHeight = with(density) {
-                            (profileHeaderHeightPx - contactsHeightPx).coerceAtLeast(0).toDp()
-                        }
-                        SkillsSection(
-                            profile.skills,
-                            isWideScreen = true,
-                            modifier = Modifier.heightIn(max = skillsMaxHeight),
-                        )
-                    }
-                }
-            } else {
-                Column {
-                    // ContactsSection pads itself the same way other sections do, so its
-                    // margin is applied here directly rather than on the wrapping Column
-                    // (which would double up with ContactsSection's own padding).
-                    ProfileHeader(
-                        profile = profile,
-                        altProfile = altProfile,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = ScreenPadding),
-                    )
-                    Spacer(Modifier.height(24.dp))
-                    ContactsSection(profile.contacts, isWideScreen = false, snackbarHostState = snackbarHostState)
-                    Spacer(Modifier.height(24.dp))
-                    SkillsSection(profile.skills, isWideScreen = false)
                 }
             }
         }
 
-        Spacer(Modifier.height(24.dp))
-        BioSection(profile.bio)
+        item { Spacer(Modifier.height(16.dp)) }
+        item {
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val isWideScreen = maxWidth >= WideLayoutBreakpoint
 
-        Spacer(Modifier.height(24.dp))
-        ExperienceSection(profile.experience)
+                if (isWideScreen) {
+                    // Two columns, top-aligned: a fixed-width profile card on the start side, with
+                    // contacts (and skills, beneath them) filling the rest of the row's width.
+                    // Skills' height is capped so that column never grows past the profile card's
+                    // height, scrolling internally instead of pushing the sections below it down.
+                    var profileHeaderHeightPx by remember { mutableStateOf(0) }
+                    var contactsHeightPx by remember { mutableStateOf(0) }
+                    val density = LocalDensity.current
 
-        Spacer(Modifier.height(24.dp))
-        ProjectsSection(profile.projects)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = ScreenPadding),
+                        horizontalArrangement = Arrangement.spacedBy(ScreenPadding),
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        ProfileHeader(
+                            profile = profile,
+                            altProfile = altProfile,
+                            modifier = Modifier
+                                .width(ProfileCardWideWidth)
+                                .onGloballyPositioned { profileHeaderHeightPx = it.size.height },
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Box(modifier = Modifier.onGloballyPositioned { contactsHeightPx = it.size.height }) {
+                                ContactsSection(profile.contacts, isWideScreen = true, snackbarHostState = snackbarHostState)
+                            }
+                            Spacer(Modifier.height(24.dp))
+                            val skillsMaxHeight = with(density) {
+                                (profileHeaderHeightPx - contactsHeightPx).coerceAtLeast(0).toDp()
+                            }
+                            SkillsSection(
+                                profile.skills,
+                                isWideScreen = true,
+                                modifier = Modifier.heightIn(max = skillsMaxHeight),
+                            )
+                        }
+                    }
+                } else {
+                    Column {
+                        // ContactsSection pads itself the same way other sections do, so its
+                        // margin is applied here directly rather than on the wrapping Column
+                        // (which would double up with ContactsSection's own padding).
+                        ProfileHeader(
+                            profile = profile,
+                            altProfile = altProfile,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = ScreenPadding),
+                        )
+                        Spacer(Modifier.height(24.dp))
+                        ContactsSection(profile.contacts, isWideScreen = false, snackbarHostState = snackbarHostState)
+                        Spacer(Modifier.height(24.dp))
+                        SkillsSection(profile.skills, isWideScreen = false)
+                    }
+                }
+            }
+        }
 
-        Spacer(Modifier.height(24.dp))
-        LinksSection(profile.links)
+        item { Spacer(Modifier.height(24.dp)) }
+        item { BioSection(profile.bio) }
 
-        Spacer(Modifier.height(24.dp))
-        TechnologiesSection(profile.applicationTechnologies, profile.serverTechnologies)
+        item { Spacer(Modifier.height(24.dp)) }
+        item { ExperienceSection(profile.experience) }
 
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = AiDisclosureText,
-            fontFamily = FontFamily(Font(Res.font.alex_brush_regular)),
-            fontSize = 32.sp,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenPadding),
-        )
-        Spacer(Modifier.height(24.dp))
+        item { Spacer(Modifier.height(24.dp)) }
+        item { ProjectsSection(profile.projects) }
+
+        item { Spacer(Modifier.height(24.dp)) }
+        item { LinksSection(profile.links) }
+
+        item { Spacer(Modifier.height(24.dp)) }
+        item { TechnologiesSection(profile.applicationTechnologies, profile.serverTechnologies) }
+
+        item { Spacer(Modifier.height(6.dp)) }
+        item {
+            Text(
+                text = AiDisclosureText,
+                fontFamily = FontFamily(Font(Res.font.alex_brush_regular)),
+                fontSize = 32.sp,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenPadding),
+            )
+        }
+        item { Spacer(Modifier.height(24.dp)) }
     }
 }
 
