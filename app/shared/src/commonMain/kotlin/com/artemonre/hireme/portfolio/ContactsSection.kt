@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.artemonre.hireme.theme.HireMeTheme
 import kotlinx.coroutines.launch
@@ -56,7 +57,16 @@ fun ContactsSection(contacts: List<PortfolioContact>, isWideScreen: Boolean, sna
         Text(
             text = if (isWideScreen) ContactsFullTitle else "Contacts",
             style = MaterialTheme.typography.titleMedium,
-            modifier = if (isWideScreen) Modifier else Modifier.clickable { showContactsList = true },
+            // fillMaxWidth + vertical padding widen the tap target well past the text's own
+            // glyph bounds, same reasoning as ContactLink's tap-target padding below.
+            modifier = if (isWideScreen) {
+                Modifier
+            } else {
+                Modifier
+                    .clickable { showContactsList = true }
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            },
         )
         // On wide screens contacts sit right here, always visible. On narrow screens, tapping
         // the header above opens a bottom sheet instead (same pattern as ExperienceSection).
@@ -85,7 +95,12 @@ fun ContactsSection(contacts: List<PortfolioContact>, isWideScreen: Boolean, sna
                 )
                 Spacer(Modifier.height(8.dp))
                 Column(modifier = Modifier.padding(horizontal = ScreenPadding)) {
-                    contacts.forEach { contact -> ContactLink(contact, uriHandler, snackbarHostState) }
+                    // Extra padding versus the wide-screen inline list — these rows are the only
+                    // way to reach a contact on narrow screens, packed into a touch-only sheet, so
+                    // they need a more generous tap target than the desktop/mouse list does.
+                    contacts.forEach { contact ->
+                        ContactLink(contact, uriHandler, snackbarHostState, verticalPadding = 12.dp)
+                    }
                 }
             }
         }
@@ -94,7 +109,12 @@ fun ContactsSection(contacts: List<PortfolioContact>, isWideScreen: Boolean, sna
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ContactLink(contact: PortfolioContact, uriHandler: UriHandler, snackbarHostState: SnackbarHostState) {
+private fun ContactLink(
+    contact: PortfolioContact,
+    uriHandler: UriHandler,
+    snackbarHostState: SnackbarHostState,
+    verticalPadding: Dp = 6.dp,
+) {
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
     val copyToClipboard: () -> Unit = {
@@ -115,7 +135,7 @@ private fun ContactLink(contact: PortfolioContact, uriHandler: UriHandler, snack
             // Expands the tap target well past the text's own glyph bounds — without this the
             // row's clickable area was exactly the text height, making entries hard to tap
             // precisely (and packed edge-to-edge with no breathing room between them).
-            .padding(vertical = 6.dp),
+            .padding(vertical = verticalPadding),
     ) {
         Text(
             text = "${contact.label}: ",
